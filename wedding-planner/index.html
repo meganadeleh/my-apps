@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wedding planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FBF8F7; --surface:#FFFFFF; --ink:#2F2A2C; --muted:#7A7075; --line:#EDE5E4;
+  --rose:#B0667B; --rose-soft:#F7EBEE; --sage:#7FA38D; --sage-soft:#E8F1EB; --ok:#5E9072; --warn:#B7803A;
+  --serif:"Fraunces", Georgia, "Times New Roman", serif;
+  --sans:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1C1A1B; --surface:#262324; --ink:#F3EEEF; --muted:#AFA4A8; --line:#3A3436;
+    --rose:#E3A3B4; --rose-soft:#3A2A2F; --sage:#9CC5AB; --sage-soft:#27352D; --ok:#9CC5AB; --warn:#E3B476;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1C1A1B; --surface:#262324; --ink:#F3EEEF; --muted:#AFA4A8; --line:#3A3436;
+  --rose:#E3A3B4; --rose-soft:#3A2A2F; --sage:#9CC5AB; --sage-soft:#27352D; --ok:#9CC5AB; --warn:#E3B476;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
+a{color:var(--rose)}
+.wrap{max-width:1000px;margin:0 auto;padding:28px 20px 60px}
+
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+header h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,6vw,50px);line-height:1.05;margin:0 0 6px}
+header p{margin:0;color:var(--muted)}
+.drive-link{display:inline-flex;align-items:center;gap:7px;margin-top:10px;padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font-size:14px;font-weight:600;text-decoration:none}
+.drive-link:hover{border-color:var(--muted)}
+.countdown{text-align:right}
+.countdown b{display:block;font-size:40px;line-height:1;font-weight:800;color:var(--rose);font-variant-numeric:tabular-nums}
+.countdown span{color:var(--muted);font-size:14px}
+
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);margin:0 -20px;padding:4px 20px 0;border-bottom:1px solid var(--line)}
+.sticky.stuck{box-shadow:0 6px 14px -12px rgba(0,0,0,.35)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{background:none;border:0;padding:12px 12px;cursor:pointer;color:var(--muted);font-weight:600;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--rose)}
+main{padding-top:20px}
+
+h2.sec{font-family:var(--serif);font-weight:400;font-size:24px;margin:26px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--rose);display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2.sec:first-child{margin-top:0}
+h2.sec small{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.count{color:var(--muted);font-size:14px}
+.chips{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex-wrap:nowrap}
+.chips button{background:var(--surface);border:0;border-left:1px solid var(--line);padding:6px 13px;cursor:pointer;font-size:14px;color:var(--muted);font-weight:600;white-space:nowrap}
+.chips button:first-child{border-left:0}
+.chips button[aria-pressed="true"]{background:var(--rose);color:#fff}
+.scrollx{overflow-x:auto;max-width:100%;scrollbar-width:none}
+.scrollx::-webkit-scrollbar{display:none}
+input.search{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;min-width:0;width:220px;max-width:100%}
+
+.row{border-bottom:1px solid var(--line)}
+.row-main{display:flex;align-items:stretch}
+.line{flex:1;min-width:0;width:100%;background:none;border:0;text-align:left;padding:11px 4px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.line:hover{background:var(--rose-soft)}
+.line .t{min-width:0}
+.line .t b{font-weight:600;display:block}
+.line .t small{display:block;color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row.done .line .t b{color:var(--muted)}
+.tick{flex:none;width:36px;background:none;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.tick span{width:20px;height:20px;border:2px solid var(--line);border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;line-height:1}
+.tick:hover span{border-color:var(--ok)}
+.tick.on span{background:var(--ok);border-color:var(--ok)}
+.pills{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;flex:none}
+.pill{font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.good{background:var(--sage-soft);border-color:var(--sage);color:var(--ink)}
+.pill.rose{background:var(--rose-soft);border-color:var(--rose);color:var(--ink)}
+.pill.warn{border-color:var(--warn);color:var(--warn)}
+.add{background:none;border:1px dashed var(--line);color:var(--muted);border-radius:4px;padding:7px 12px;cursor:pointer;margin-top:10px;font-size:14px}
+.add:hover{color:var(--rose);border-color:var(--rose)}
+
+.editor{padding:14px 4px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px 14px;background:var(--surface);border-top:1px dashed var(--line)}
+.editor label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.editor .wide{grid-column:1/-1}
+.editor .check{flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--ink);padding-top:18px}
+.editor .links{grid-column:1/-1;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.editor .links a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.editor .actions{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px}
+input[type=text],input[type=number],input[type=tel],input[type=email],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:70px}
+.btn{background:var(--rose);color:#fff;border:0;border-radius:4px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn.ghost{background:none;color:var(--muted);border:1px solid var(--line)}
+.btn.danger{background:none;color:var(--rose);border:1px solid var(--rose)}
+.x{background:none;border:0;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;padding:4px 6px;flex:none}
+.x:hover{color:var(--rose)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:10px}
+.stats div{background:var(--surface);padding:10px 14px}
+.stats b{display:block;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.stats small{color:var(--muted);font-size:13px}
+.substats{color:var(--muted);font-size:14px;margin:0 0 16px}
+
+.tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px}
+.tcard h3{font-family:var(--serif);font-weight:400;font-size:20px;margin:0}
+.tcard .note{color:var(--muted);font-size:13px;margin:2px 0 8px}
+.tcard ul{list-style:none;margin:0;padding:0}
+.tcard li{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-top:1px solid var(--line);font-size:15px}
+.tcard li small{color:var(--muted)}
+.tcard .erow{display:flex;gap:6px;align-items:center;margin-top:6px}
+.tcard .erow input{padding:5px 8px}
+
+.timeline{margin:0;padding:0;list-style:none}
+.timeline li{display:grid;grid-template-columns:160px 1fr;gap:14px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.timeline li b{font-variant-numeric:tabular-nums;color:var(--rose);font-weight:700}
+.songs h3{font-size:13px;color:var(--muted);font-weight:700;margin:16px 0 4px}
+.songs p{margin:0;padding:8px 4px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}
+.songs p span{color:var(--muted);font-size:14px}
+.lrow{display:flex;gap:6px;align-items:center;padding:5px 0}
+.lrow input{padding:6px 8px}
+.lrow input.time{max-width:170px}
+.lrow input.part{max-width:140px}
+
+.chosen{background:var(--rose-soft);border:1px solid var(--rose);border-radius:6px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.chosen b{font-family:var(--serif);font-weight:400;font-size:22px}
+.chosen select{width:auto;max-width:100%}
+.wines{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.wine{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.wine.win{border-color:var(--sage);box-shadow:inset 0 0 0 1px var(--sage)}
+.wine h3{margin:0;font-size:17px;font-weight:700;display:flex;justify-content:space-between;gap:8px}
+.wine .meta{color:var(--muted);font-size:13px;margin:0}
+.wine .taste{font-size:14px;margin:0}
+.scores{display:flex;gap:10px;align-items:flex-end;margin-top:4px}
+.scores label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);width:78px}
+.scores .tot{margin-left:auto;text-align:right}
+.scores .tot b{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.linkbtn{background:none;border:0;color:var(--rose);cursor:pointer;padding:0;font-size:14px;text-align:left;font-weight:600;font-family:var(--sans)}
+.wine h3 .pill{flex:none;align-self:flex-start;font-weight:600}
+.editor textarea{min-height:110px}
+
+.courses3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:10px}
+.clabel{font-size:13px;color:var(--muted);font-weight:700;margin:0 0 4px}
+.dishcount{display:flex;justify-content:space-between;gap:10px;margin:0;padding:7px 0;border-bottom:1px solid var(--line)}
+.dishcount b{font-variant-numeric:tabular-nums}
+.meal{display:grid;grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,1fr)) minmax(0,.8fr);gap:10px;align-items:end;padding:12px 0;border-bottom:1px solid var(--line)}
+.meal .who{align-self:center;min-width:0}
+.meal .who b{display:block;font-weight:600}
+.meal .who small{color:var(--muted);font-size:13px}
+.meal label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted);min-width:0}
+.meal select,.meal input{padding:6px 8px}
+.notice{background:var(--sage-soft);border:1px solid var(--sage);padding:14px 16px;border-radius:4px;margin:20px 0}
+.empty{color:var(--muted);padding:24px 0}
+.status{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:4px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.status.show{opacity:1}
+@media (prefers-reduced-motion: reduce){.status{transition:none}}
+
+@media (max-width:620px){
+  .wrap{padding:20px 14px 50px}
+  .sticky{margin:0 -14px;padding:0 14px}
+  nav.tabs button{padding:12px 9px;font-size:15px}
+  input,select,textarea{font-size:16px!important}
+  .countdown{text-align:left}
+  .countdown b{font-size:32px}
+  .timeline li{grid-template-columns:1fr;gap:0}
+  .lrow{flex-wrap:wrap}
+  .lrow.nowrap{flex-wrap:nowrap}
+  .lrow.nowrap input{flex:1;width:auto}
+  .lrow input.time,.lrow input.part{max-width:none;flex:1 1 40%}
+  .pills{max-width:45%}
+  .meal{grid-template-columns:1fr 1fr}
+  .meal .who{grid-column:1/-1}
+  .line{align-items:flex-start}
+  input.search{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Wedding planner</h1>
+      <p id="when">Loading...</p>
+    </div>
+    <div class="countdown" id="countdown"></div>
+  </header>
+  <div class="sticky" id="sticky">
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+  </div>
+  <main id="view"></main>
+</div>
+<div class="status" id="status" role="status" aria-live="polite"></div>
+
+<script>
+/* Standalone storage: when this page runs outside claude.ai, everything is saved
+   in this browser's localStorage. Nothing is sent anywhere. */
+(function(){
+  if (window.claude && window.claude.use) return;
+  var KEY = 'app-data:' + location.pathname;
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { store = {}; }
+  var listeners = [];
+  function persist(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+  function clone(v){ return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
+  function norm(p){ return String(p).replace(/^\/+|\/+$/g, ''); }
+  function notify(){ setTimeout(function(){ listeners.slice().forEach(function(l){ try { l(); } catch (e) {} }); }, 0); }
+  function docSnap(path){
+    var has = Object.prototype.hasOwnProperty.call(store, path);
+    var id = path.split('/').pop();
+    return { id: id, exists: has, metadata: { hasPendingWrites: false },
+      data: function(){ return has ? clone(store[path]) : undefined; }, ref: docRef(path) };
+  }
+  function docRef(p){
+    var path = norm(p);
+    return {
+      id: path.split('/').pop(), path: path,
+      get: function(){ return Promise.resolve(docSnap(path)); },
+      set: function(d){ store[path] = clone(d) || {}; persist(); notify(); return Promise.resolve(); },
+      update: function(patch){ store[path] = Object.assign({}, store[path] || {}, clone(patch)); persist(); notify(); return Promise.resolve(); },
+      delete: function(){ delete store[path]; persist(); notify(); return Promise.resolve(); },
+      onSnapshot: function(cb){
+        var last = null;
+        var fire = function(){ var s = JSON.stringify(store[path]); if (s === last) return; last = s; cb(docSnap(path)); };
+        listeners.push(fire); setTimeout(fire, 0);
+        return function(){ listeners = listeners.filter(function(x){ return x !== fire; }); };
+      }
+    };
+  }
+  function colSnap(path){
+    var pre = path + '/';
+    var docs = Object.keys(store).filter(function(k){ return k.indexOf(pre) === 0 && k.slice(pre.length).indexOf('/') < 0; })
+      .sort().map(function(k){ return docSnap(k); });
+    return { docs: docs, size: docs.length, empty: !docs.length, forEach: function(f){ docs.forEach(f); } };
+  }
+  function colRef(p){
+    var path = norm(p);
+    return {
+      path: path,
+      doc: function(id){ return docRef(path + '/' + (id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)))); },
+      get: function(){ return Promise.resolve(colSnap(path)); },
+      onSnapshot: function(cb){
+        var last = null;
+        var fire = function(){ var s = colSnap(path); var sig = JSON.stringify(s.docs.map(function(d){ return [d.id, store[path + '/' + d.id]]; })); if (sig === last) return; last = sig; cb(s); };
+        listeners.push(fire); setTimeout(fire, 0);
+        return function(){ listeners = listeners.filter(function(x){ return x !== fire; }); };
+      }
+    };
+  }
+  var db = { doc: docRef, collection: colRef };
+  var user = { id: function(){ return Promise.resolve('local'); } };
+  var downloads = { save: function(o){
+    var blob = o.data instanceof Blob ? o.data : new Blob([o.data], { type: o.mimeType || 'application/octet-stream' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = o.filename || 'download';
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return Promise.resolve();
+  } };
+  window.claude = { use: function(name){
+    if (name === 'db') return Promise.resolve(db);
+    if (name === 'user') return Promise.resolve(user);
+    if (name === 'downloads') return Promise.resolve(downloads);
+    return Promise.resolve(null);
+  } };
+})();
+</script>
+<script>
+(function(){
+  const TABS = [['tasks','To do'],['vendors','Vendors'],['guests','Guests'],['addresses','Addresses'],['seating','Seating'],['menu','Menu'],['day','The day'],['photos','Photos'],['rose','Wine']];
+  const COLS = ['tasks','vendors','guests','ceremony','tables','rose','addresses','meals','shots'];
+  const RSVPS = ['Attending','Unconfirmed','Declined','Evening'];
+  const S = { tab:'tasks', d:{}, lists:{}, meta:{}, ready:{}, open:null, taskFilter:'todo', gList:'guests', gFilter:'all', gSearch:'', seatEdit:false, aFilter:'all', aSearch:'', mList:'guests', dishEdit:false, listEdit:{}, readOnly:false };
+  COLS.forEach(c=>S.d[c]=[]);
+  let db = null;
+  const $ = s => document.querySelector(s);
+  const view = $('#view');
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const n = v => (typeof v==='number' && isFinite(v)) ? v : 0;
+  const has = v => typeof v==='number' && isFinite(v);
+  const byOrder = arr => [...arr].sort((a,b)=>n(a.order)-n(b.order));
+  const nextOrder = arr => Math.max(0,...arr.map(x=>n(x.order)))+1;
+  const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+
+  /* ---------- status + writes ---------- */
+  let stT;
+  function status(msg){ const el=$('#status'); el.textContent=msg; el.classList.add('show'); clearTimeout(stT); stT=setTimeout(()=>el.classList.remove('show'),1800); }
+  const queues={};
+  function write(path, fn){
+    if(!db){ status('Saving is not available here'); return Promise.resolve(); }
+    const next=(queues[path]||Promise.resolve()).then(fn).then(()=>status('Saved')).catch(e=>{
+      if(e && e.code==='invalid_argument'){ S.readOnly=true; status('You can view this planner but not edit it'); render(); }
+      else if(e && e.code==='quota_exceeded') status('Storage is full, delete something first');
+      else status('Could not save, try again');
+    });
+    queues[path]=next; return next;
+  }
+  const upd=(p,patch)=>write(p,()=>db.doc(p).update(patch));
+  const setDoc=(p,body)=>write(p,()=>db.doc(p).set(body));
+  const del=p=>write(p,()=>db.doc(p).delete());
+
+  /* ---------- render scheduling ---------- */
+  let pending=false;
+  const editing=()=>{ const a=document.activeElement; return a && view.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName); };
+  const schedule=()=>{ if(editing()){ pending=true; return; } render(); };
+  view.addEventListener('focusout',()=>setTimeout(()=>{ if(pending && !editing()){ pending=false; render(); } },0));
+
+  /* ---------- generic field editor ---------- */
+  const FIELDS = {
+    tasks:[['title','Task','text','wide'],['details','Details','textarea','wide'],['links','Links (one per line)','textarea','wide'],['status','Status','text'],['who','Who','text']],
+    vendors:[['category','Type','text'],['name','Name','text'],['contact','Contact person','text'],['phone','Phone','tel'],['email','Email','email'],['booked','Booked','check'],['deposit','Deposit paid','check'],['contract','Contract saved in folder','check'],['notes','Notes and dates to be aware of','textarea','wide'],['links','Links (one per line)','textarea','wide']],
+    guests:[['name','Name','text'],['rsvp','RSVP','select',RSVPS],['table','Table','text'],['group','Invite group','text'],['famFriend','Family or friend','select',['Family','Friend']],['whose','Whose guest','select',['Bride','Groom','Both']],['dietary','Dietary','text'],['saveTheDate','Save the date sent','check'],['evening','Evening guest','check'],['gift','Gift received','check'],['thankYou','Thank you sent','check'],['giftDetails','Gift details','text','wide']],
+    ceremony:[['name','Name','text'],['rsvp','RSVP','select',RSVPS],['table','Table','text'],['group','Invite group','text'],['famFriend','Family or friend','select',['Family','Friend']],['whose','Whose guest','select',['Bride','Groom','Both']],['dietary','Dietary','text'],['contact','Contact','text'],['evening','Evening guest','check'],['gift','Gift received','check'],['thankYou','Thank you sent','check'],['giftDetails','Gift details','text','wide']],
+    nights:[['name','Name','text'],['prePost','Pre or post','select',['Pre','Post']],['contact','Contact','text'],['price','Quoted price','text'],['deals','Deals, offers or links','text','wide'],['pros','Pros','textarea'],['cons','Cons','textarea'],['booked','Booked','check']],
+    addresses:[['names',"Who it's for",'text','wide'],['addressName','Name on the envelope','text','wide'],['line1','Address line 1','text','wide'],['line2','Address line 2','text','wide'],['town','Town','text'],['county','County','text'],['postcode','Postcode','text'],['country','Country','text'],['sent','Invitation sent','check'],['evening','Evening invitation','check'],['notes','Notes','text','wide']],
+    shots:[['title','Shot','text','wide'],['group','Group','text'],['people','Who is in it','textarea','wide'],['notes','Notes for the photographer','text','wide'],['done','Taken','check']],
+    rose:[['name','Wine','text','wide'],['round','Round','round'],['region','Where from','text'],['grapes','Grapes','text'],['style','Colour & style','text'],['price','Price','text'],['taste',"What it's like",'textarea','wide'],['notes','Our notes','textarea','wide']]
+  };
+  function linksHtml(text){
+    const ls=String(text||'').split('\n').map(s=>s.trim()).filter(s=>/^https?:\/\//.test(s));
+    if(!ls.length) return '';
+    return `<div class="links">${ls.map(u=>{ let label=u; try{ const x=new URL(u); label=x.hostname.replace(/^www\./,'')+(x.pathname.length>1?x.pathname.slice(0,40)+(x.pathname.length>40?'...':''):''); }catch(e){} return `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(label)}</a>`; }).join('')}</div>`;
+  }
+  function editorHtml(col, r){
+    const dis=S.readOnly?'disabled':'';
+    let h=`<div class="editor" data-col="${col}" data-id="${esc(r.id)}">`;
+    if(col==='vendors'){
+      const c=[r.phone?`<a href="tel:${esc(String(r.phone).split('\n')[0].replace(/[^\d+]/g,''))}">Call ${esc(String(r.phone).split('\n')[0])}</a>`:'', r.email?`<a href="mailto:${esc(r.email)}">Email ${esc(r.email)}</a>`:''].filter(Boolean).join('');
+      if(c) h+=`<div class="links">${c}</div>`;
+    }
+    if(r.links) h+=linksHtml(r.links);
+    FIELDS[col].forEach(([f,label,type,opt])=>{
+      const wide = opt==='wide' ? 'wide' : '';
+      if(type==='check') h+=`<label class="check"><input type="checkbox" data-f="${f}" ${r[f]?'checked':''} ${dis}> ${label}</label>`;
+      else if(type==='textarea') h+=`<label class="${wide}">${label}<textarea data-f="${f}" ${dis}>${esc(r[f])}</textarea></label>`;
+      else if(type==='select'){ const opts=[...new Set([...(opt||[]), r[f]||''])]; h+=`<label>${label}<select data-f="${f}" ${dis}>${opts.map(o=>`<option ${o===(r[f]||'')?'selected':''} value="${esc(o)}">${esc(o||'-')}</option>`).join('')}</select></label>`; }
+      else if(type==='round'){ const rounds=roundsList(); h+=`<label>${label}<select data-f="${f}" ${dis}>${rounds.map(o=>`<option ${o===r[f]?'selected':''} value="${esc(o)}">${esc(shortRound(o))}</option>`).join('')}</select></label>`; }
+      else h+=`<label class="${wide}">${label}<input type="${type}" data-f="${f}" value="${esc(r[f])}" ${dis}></label>`;
+    });
+    h+=`<div class="actions">${S.readOnly?'<span></span>':`<button class="btn danger" data-del="${col}:${esc(r.id)}">Delete</button>`}<button class="btn ghost" data-open="${col}:${esc(r.id)}">Close</button></div></div>`;
+    return h;
+  }
+  function addRow(col, body){
+    const id=newId(col[0]); S.open=col+':'+id;
+    const rec={...body, order:nextOrder(S.d[col])};
+    S.d[col].push({id,...rec}); render();
+    setDoc(col+'/'+id, rec);
+    setTimeout(()=>{ const i=view.querySelector(`.editor[data-id="${id}"] input[type=text]`); if(i){ i.focus(); i.select(); } },30);
+  }
+  const isOpen=(col,id)=>S.open===col+':'+id;
+  const tickBtn=(col,r,field,label)=>`<button class="tick ${r[field]?'on':''}" data-tick="${col}:${esc(r.id)}:${field}" aria-pressed="${!!r[field]}" aria-label="${esc(label)}" ${S.readOnly?'disabled':''}><span>${r[field]?'✓':''}</span></button>`;
+  const chips=(key,cur,opts)=>`<div class="scrollx"><div class="chips" role="group">${opts.map(([v,l])=>`<button data-chip="${key}:${v}" aria-pressed="${cur===v}">${l}</button>`).join('')}</div></div>`;
+
+  /* ---------- tasks ---------- */
+  function renderTasks(){
+    const all=byOrder(S.d.tasks); const done=all.filter(t=>t.done).length;
+    const shown = S.taskFilter==='done'?all.filter(t=>t.done):S.taskFilter==='todo'?all.filter(t=>!t.done):all;
+    let h=`<div class="toolbar">${chips('task',S.taskFilter,[['todo','To do'],['done','Done'],['all','All']])}<span class="count">${done} of ${all.length} done</span></div>`;
+    if(!shown.length) h+=`<p class="empty">${S.taskFilter==='todo'?'Nothing left to do here.':'Nothing here yet.'}</p>`;
+    shown.forEach(t=>{
+      const sub = t.status || String(t.details||'').split('\n')[0] || (t.links?'Has links':'');
+      h+=`<div class="row ${t.done?'done':''}"><div class="row-main">${tickBtn('tasks',t,'done','Mark '+t.title+' as done')}
+        <button class="line" data-open="tasks:${esc(t.id)}" aria-expanded="${isOpen('tasks',t.id)}"><span class="t"><b>${esc(t.title||'Untitled')}</b>${sub?`<small>${esc(sub)}</small>`:''}</span>${t.who?`<span class="pills"><span class="pill">${esc(t.who)}</span></span>`:''}</button></div>
+        ${isOpen('tasks',t.id)?editorHtml('tasks',t):''}</div>`;
+    });
+    if(!S.readOnly) h+=`<button class="add" data-add="tasks">Add a task</button>`;
+    return h;
+  }
+
+  /* ---------- vendors ---------- */
+  function renderVendors(){
+    const all=byOrder(S.d.vendors); const booked=all.filter(v=>v.booked).length;
+    let h=`<div class="toolbar"><span class="count">${booked} of ${all.length} booked</span></div>`;
+    all.forEach(v=>{
+      const pills=[v.booked?'<span class="pill good">Booked</span>':'<span class="pill warn">Not booked</span>', v.deposit?'<span class="pill good">Deposit paid</span>':'', v.contract?'<span class="pill">Contract saved</span>':''].join('');
+      h+=`<div class="row"><div class="row-main"><button class="line" data-open="vendors:${esc(v.id)}" aria-expanded="${isOpen('vendors',v.id)}"><span class="t"><b>${esc(v.category||'Vendor')}</b><small>${esc([v.name,v.contact].filter(Boolean).join(', ')||'No supplier yet')}</small></span><span class="pills">${pills}</span></button></div>
+        ${isOpen('vendors',v.id)?editorHtml('vendors',v):''}</div>`;
+    });
+    if(!S.readOnly) h+=`<button class="add" data-add="vendors">Add a vendor</button>`;
+    return h;
+  }
+
+  /* ---------- guests ---------- */
+  function guestRows(){
+    const col=S.gList; let rows=byOrder(S.d[col]);
+    if(S.gFilter!=='all') rows=rows.filter(g=>g.rsvp===S.gFilter);
+    const q=S.gSearch.trim().toLowerCase(); if(q) rows=rows.filter(g=>String(g.name).toLowerCase().includes(q));
+    if(!rows.length) return '<p class="empty">No guests match.</p>';
+    return rows.map(g=>{
+      const cls = g.rsvp==='Attending'?'good':g.rsvp==='Evening'?'rose':g.rsvp==='Declined'?'':'warn';
+      const sub=[g.famFriend, g.whose?(g.whose==='Both'?'Both':g.whose+"'s guest"):'', g.table?'Table '+g.table:'', g.dietary].filter(Boolean).join(', ');
+      return `<div class="row"><div class="row-main"><button class="line" data-open="${col}:${esc(g.id)}" aria-expanded="${isOpen(col,g.id)}"><span class="t"><b>${esc(g.name)}</b>${sub?`<small>${esc(sub)}</small>`:''}</span><span class="pills"><span class="pill ${cls}">${esc(g.rsvp||'Unconfirmed')}</span></span></button></div>
+        ${isOpen(col,g.id)?editorHtml(col,g):''}</div>`;
+    }).join('');
+  }
+  function renderGuests(){
+    const col=S.gList; const all=S.d[col];
+    const c=k=>all.filter(g=>g.rsvp===k).length;
+    const w=k=>all.filter(g=>g.whose===k && g.rsvp!=='Declined').length;
+    let h=`<div class="toolbar">${chips('glist',S.gList,[['guests','Guest list'],['ceremony','Ceremony']])}<span class="count">${all.length} people</span></div>
+      <div class="stats"><div><b>${c('Attending')}</b><small>Attending</small></div><div><b>${c('Unconfirmed')}</b><small>Unconfirmed</small></div><div><b>${c('Declined')}</b><small>Declined</small></div><div><b>${c('Evening')}</b><small>Evening</small></div></div>
+      <p class="substats">Not counting declines: ${w('Bride')} bride's side, ${w('Groom')} groom's side, ${w('Both')} both.</p>
+      <div class="toolbar">${chips('gfilter',S.gFilter,[['all','All'],...RSVPS.map(r=>[r,r])])}<input class="search" type="text" id="gsearch" placeholder="Search names" value="${esc(S.gSearch)}" aria-label="Search guests"></div>
+      <div id="glist">${guestRows()}</div>`;
+    if(!S.readOnly) h+=`<button class="add" data-add="${col}">Add a guest</button>`;
+    return h;
+  }
+
+  /* ---------- addresses ---------- */
+  const addrLine=a=>[a.line1,a.line2,a.town,a.county,a.postcode,a.country].filter(x=>String(x||'').trim()).join(', ');
+  function addrRows(){
+    let rows=byOrder(S.d.addresses);
+    if(S.aFilter==='missing') rows=rows.filter(a=>!addrLine(a)); else if(S.aFilter==='notsent') rows=rows.filter(a=>!a.sent); else if(S.aFilter==='sent') rows=rows.filter(a=>a.sent);
+    const q=S.aSearch.trim().toLowerCase(); if(q) rows=rows.filter(a=>(String(a.names)+' '+addrLine(a)+' '+String(a.addressName)).toLowerCase().includes(q));
+    if(!rows.length) return '<p class="empty">No invitations match.</p>';
+    return rows.map(a=>{ const line=addrLine(a);
+      return `<div class="row ${a.sent?'done':''}"><div class="row-main">${tickBtn('addresses',a,'sent','Mark invitation for '+a.names+' as sent')}<button class="line" data-open="addresses:${esc(a.id)}" aria-expanded="${isOpen('addresses',a.id)}"><span class="t"><b>${esc(a.addressName||a.names||'New invitation')}</b>${(line||a.addressName)?`<small>${esc(line||a.names)}</small>`:''}</span><span class="pills">${a.evening?'<span class="pill rose">Evening</span>':''}${line?'':'<span class="pill warn">Address needed</span>'}</span></button></div>
+        ${isOpen('addresses',a.id)?editorHtml('addresses',a):''}</div>`; }).join('');
+  }
+  function renderAddresses(){
+    const all=S.d.addresses; const withA=all.filter(a=>addrLine(a)).length; const sent=all.filter(a=>a.sent).length; const ev=all.filter(a=>a.evening).length;
+    let h=`<div class="stats"><div><b>${all.length}</b><small>Invitations (${all.length-ev} day, ${ev} evening)</small></div><div><b>${withA}</b><small>With an address</small></div><div><b>${sent}</b><small>Sent</small></div></div>
+      <p class="substats">One row per invitation. Tick when it's been sent.</p>
+      <div class="toolbar">${chips('afilter',S.aFilter,[['all','All'],['missing','Needs address'],['notsent','Not sent'],['sent','Sent']])}<input class="search" type="text" id="asearch" placeholder="Search" value="${esc(S.aSearch)}" aria-label="Search invitations"></div>
+      <div id="alist">${addrRows()}</div>`;
+    if(!S.readOnly) h+=`<button class="add" data-add="addresses">Add an invitation</button>`;
+    return h;
+  }
+
+  /* ---------- menu (meal choices) ---------- */
+  const COURSES=[['starters','starter','Starters','Starter'],['mains','main','Mains','Main'],['desserts','dessert','Desserts','Dessert']];
+  const mealFor=(list,id)=>S.d.meals.find(m=>m.id===list+'-'+id)||{};
+  function renderMenu(){
+    const md=S.meta.menu||{}; const dis=S.readOnly?'disabled':'';
+    const list=S.mList; const guests=byOrder(S.d[list].filter(g=>g.rsvp==='Attending'));
+    const meals=guests.map(g=>mealFor(list,g.id));
+    const allChosen=meals.filter(m=>COURSES.every(([k,f])=>!(md[k]||[]).length || m[f])).length;
+    let h=`<div class="toolbar">${chips('mlist',S.mList,[['guests','Guest list'],['ceremony','Ceremony']])}<span class="count">${guests.length} attending, ${allChosen} with choices made</span></div>`;
+    // dishes
+    h+=`<h2 class="sec">Dishes${S.readOnly?'':`<button class="linkbtn" data-dishedit>${S.dishEdit?'Done editing':'Edit dishes'}</button>`}</h2>`;
+    if(S.dishEdit){
+      h+=`<div class="courses3">${COURSES.map(([k,,label])=>`<div><h3 class="clabel">${label}</h3>${(md[k]||[]).map((d,i)=>`<div class="lrow nowrap"><input type="text" data-dish="${k}:${i}" value="${esc(d)}" placeholder="Dish" ${dis}><button class="x" data-dishdel="${k}:${i}" aria-label="Remove">×</button></div>`).join('')}<button class="add" data-dishadd="${k}">Add a ${label.toLowerCase().slice(0,-1)}</button></div>`).join('')}</div>`;
+    } else if(!COURSES.some(([k])=>(md[k]||[]).length)){
+      h+=`<p class="empty">No dishes yet. Once you've picked your menu, tap Edit dishes and add them, then choose each guest's meal below.</p>`;
+    } else {
+      h+=`<div class="courses3">${COURSES.map(([k,f,label])=>`<div><h3 class="clabel">${label}</h3>${(md[k]||[]).map(d=>{ const c=meals.filter(m=>m[f]===d).length; return `<p class="dishcount"><span>${esc(d)}</span><b>${c}</b></p>`; }).join('')||'<p class="dishcount"><span>None added</span></p>'}</div>`).join('')}</div>`;
+    }
+    // guests
+    h+=`<h2 class="sec">Guest choices<small>Dietary needs come from the Guests tab</small></h2>`;
+    if(!guests.length) h+='<p class="empty">No attending guests on this list yet.</p>';
+    guests.forEach(g=>{
+      const m=mealFor(list,g.id);
+      const sel=([k,f,,label])=>{ const opts=md[k]||[]; if(!opts.length) return ''; const cur=m[f]||''; const all=[...new Set([...opts,...(cur?[cur]:[])])];
+        return `<label>${label}<select data-meal="${f}" ${dis}><option value="">Not chosen</option>${all.map(o=>`<option ${o===cur?'selected':''} value="${esc(o)}">${esc(o)}</option>`).join('')}</select></label>`; };
+      h+=`<div class="meal" data-mealg="${esc(g.id)}"><div class="who"><b>${esc(g.name)}</b><small>${esc([g.table?'Table '+g.table:'', g.dietary].filter(Boolean).join(', ')||'No table or dietary notes')}</small></div>
+        ${COURSES.map(sel).join('')}<label>Drink<input type="text" data-meal="drink" value="${esc(m.drink)}" ${dis}></label></div>`;
+    });
+    return h;
+  }
+  function saveMeal(gid, patch){
+    const list=S.mList; const id=list+'-'+gid; const cur=S.d.meals.find(m=>m.id===id);
+    const body={starter:'',main:'',dessert:'',drink:'',...(cur||{}),...patch}; delete body.id;
+    if(cur) Object.assign(cur,patch); else S.d.meals.push({id,...body});
+    setDoc('meals/'+id, body);
+  }
+  function saveDishes(md){ S.meta.menu=md; setDoc('meta/menu',{starters:md.starters||[],mains:md.mains||[],desserts:md.desserts||[]}); }
+
+  /* ---------- photos ---------- */
+  function renderPhotos(){
+    const all=byOrder(S.d.shots); const done=all.filter(x=>x.done).length;
+    let h=`<div class="toolbar"><span class="count">${done} of ${all.length} shots taken</span></div><p class="substats">Your list of group photos for the photographer. Tap a shot to add names or notes.</p>`;
+    const groups=[...new Set(all.map(x=>x.group||'Other'))];
+    groups.forEach(g=>{
+      h+=`<h2 class="sec">${esc(g)}</h2>`;
+      all.filter(x=>(x.group||'Other')===g).forEach(x=>{
+        h+=`<div class="row ${x.done?'done':''}"><div class="row-main">${tickBtn('shots',x,'done','Mark '+x.title+' as taken')}<button class="line" data-open="shots:${esc(x.id)}" aria-expanded="${isOpen('shots',x.id)}"><span class="t"><b>${esc(x.title||'New shot')}</b>${x.people?`<small>${esc(x.people)}</small>`:''}</span></button></div>
+          ${isOpen('shots',x.id)?editorHtml('shots',x):''}</div>`;
+      });
+      if(!S.readOnly) h+=`<button class="add" data-shotadd="${esc(g)}">Add a shot to ${esc(g)}</button>`;
+    });
+    if(!S.readOnly) h+=`<div><button class="add" data-shotgroup>Add a new group</button></div>`;
+    return h;
+  }
+
+  /* ---------- seating ---------- */
+  function renderSeating(){
+    const tables=byOrder(S.d.tables); const dis=S.readOnly?'disabled':'';
+    const seated=tables.reduce((s,t)=>s+(t.guests||[]).length,0);
+    let h=`<div class="toolbar"><span class="count">${tables.length} tables, ${seated} seats filled</span>${S.readOnly?'':`<button class="btn ${S.seatEdit?'':'ghost'}" data-seatedit>${S.seatEdit?'Done editing':'Edit tables'}</button>`}</div><div class="tables">`;
+    tables.forEach(t=>{
+      const gs=t.guests||[];
+      if(S.seatEdit){
+        h+=`<div class="tcard" data-table="${esc(t.id)}"><div class="erow"><input type="text" data-tf="name" value="${esc(t.name)}" aria-label="Table name" ${dis}><button class="x" data-tdel="${esc(t.id)}" aria-label="Delete ${esc(t.name)}">×</button></div>
+          <div class="erow"><input type="text" data-tf="note" value="${esc(t.note)}" placeholder="Where it is, notes" aria-label="Table note" ${dis}></div>
+          ${gs.map((g,i)=>`<div class="erow"><input type="text" data-tg="${i}:name" value="${esc(g.name)}" placeholder="Name" aria-label="Guest name" ${dis}><input type="text" data-tg="${i}:dietary" value="${esc(g.dietary)}" placeholder="Dietary" aria-label="Dietary" style="max-width:90px" ${dis}><button class="x" data-tgdel="${esc(t.id)}:${i}" aria-label="Remove ${esc(g.name)}">×</button></div>`).join('')}
+          <button class="add" data-tgadd="${esc(t.id)}">Add guest</button></div>`;
+      } else {
+        h+=`<div class="tcard"><h3>${esc(t.name)}</h3><p class="note">${esc(t.note||'')}${t.note?', ':''}${gs.length} guests</p><ul>${gs.map(g=>`<li><span>${esc(g.name)}</span>${g.dietary?`<small>${esc(g.dietary)}</small>`:''}</li>`).join('')}</ul></div>`;
+      }
+    });
+    h+=`</div>`;
+    if(S.seatEdit) h+=`<button class="add" data-tadd>Add a table</button>`;
+    return h;
+  }
+  function saveTable(t){ upd('tables/'+t.id,{name:t.name,note:t.note||'',guests:t.guests||[]}); }
+
+  /* ---------- the day (lists) ---------- */
+  function listSection(key, title, kind){
+    const items=(S.lists[key]&&S.lists[key].items)||[]; const ed=S.listEdit[key]; const dis=S.readOnly?'disabled':'';
+    let h=`<h2 class="sec">${title}${S.readOnly?'':`<button class="linkbtn" data-ledit="${key}">${ed?'Done editing':'Edit'}</button>`}</h2>`;
+    if(ed){
+      h+=items.map((it,i)=> kind==='songs'
+        ? `<div class="lrow" data-list="${key}" data-i="${i}"><input class="part" type="text" data-lf="part" value="${esc(it.part)}" placeholder="Part of day" ${dis}><input class="part" type="text" data-lf="moment" value="${esc(it.moment)}" placeholder="Moment" ${dis}><input type="text" data-lf="song" value="${esc(it.song)}" placeholder="Song" ${dis}><button class="x" data-ldel="${key}:${i}" aria-label="Remove">×</button></div>`
+        : `<div class="lrow" data-list="${key}" data-i="${i}"><input class="time" type="text" data-lf="time" value="${esc(it.time)}" placeholder="Time" ${dis}><input type="text" data-lf="what" value="${esc(it.what)}" placeholder="What's happening" ${dis}><button class="x" data-ldel="${key}:${i}" aria-label="Remove">×</button></div>`).join('');
+      h+=`<button class="add" data-ladd="${key}">${kind==='songs'?'Add a song':'Add a time'}</button>`;
+    } else if(kind==='songs'){
+      let last=null; h+='<div class="songs">';
+      items.forEach(it=>{ if(it.part!==last){ h+=`<h3>${esc(it.part||'Other')}</h3>`; last=it.part; } h+=`<p><b style="font-weight:500">${esc(it.song||'Not picked yet')}</b>${it.moment?`<span>${esc(it.moment)}</span>`:''}</p>`; });
+      h+='</div>';
+    } else {
+      h+=items.length?`<ul class="timeline">${items.map(it=>`<li><b>${esc(it.time)}</b><span>${esc(it.what)}</span></li>`).join('')}</ul>`:'<p class="empty">Nothing added yet.</p>';
+    }
+    return h;
+  }
+  function renderDay(){ return listSection('day','Running order','time') + listSection('groom',"Getting ready",'time') + listSection('songs','Songs','songs'); }
+  function saveList(key){ const items=(S.lists[key]||{}).items||[]; setDoc('lists/'+key,{items}); }
+
+  /* ---------- wine ---------- */
+  const roundsList=()=>{ const m=(S.meta.rose&&S.meta.rose.rounds)||[]; const d=S.d.rose.map(w=>w.round).filter(Boolean); return [...new Set([...m,...d])]; };
+  const shortRound=r=>String(r).split(' - ')[0];
+  const total=w=> (has(w.p1)||has(w.p2)) ? n(w.p1)+n(w.p2) : null;
+  function renderRose(){
+    const dis=S.readOnly?'disabled':'';
+    const names=[...new Set(byOrder(S.d.rose).map(w=>w.name))];
+    const chosen=(S.meta.rose&&S.meta.rose.chosen)||'';
+    let h=`<div class="chosen"><div><small style="color:var(--muted)">Our wedding wine</small><br><b>${esc(chosen||'Not chosen yet')}</b></div>
+      <select id="chosenSel" aria-label="Choose our wedding wine" ${dis}><option value="">Change...</option>${names.map(nm=>`<option value="${esc(nm)}">${esc(nm)}</option>`).join('')}</select></div>
+      <p class="substats">Score each wine out of 10. The winner of each round is highlighted once every wine in it has both scores.</p>`;
+    roundsList().forEach(r=>{
+      const ws=byOrder(S.d.rose.filter(w=>w.round===r));
+      const complete=ws.length>1 && ws.every(w=>has(w.p1)&&has(w.p2));
+      const best=complete?Math.max(...ws.map(total)):null;
+      const parts=String(r).split(' - ');
+      h+=`<h2 class="sec">${esc(parts[0])}${parts[1]?`<small>${esc(parts.slice(1).join(' - '))}</small>`:''}</h2><div class="wines">`;
+      ws.forEach(w=>{
+        const t=total(w); const win=complete && t===best;
+        h+=`<div class="wine ${win?'win':''}" data-wine="${esc(w.id)}"><h3><span>${esc(w.name)}</span>${win?'<span class="pill good">Winner</span>':''}</h3>
+          <p class="meta">${esc([w.region,w.grapes,w.price].filter(Boolean).join(', '))}</p>
+          ${w.taste?`<p class="taste">${esc(w.taste)}</p>`:''}${w.notes?`<p class="taste"><i>${esc(w.notes)}</i></p>`:''}
+          <div class="scores"><label>Partner 1 /10<input type="number" min="0" max="10" step="0.5" inputmode="decimal" data-score="p1" value="${has(w.p1)?w.p1:''}" ${dis}></label>
+          <label>Partner 2 /10<input type="number" min="0" max="10" step="0.5" inputmode="decimal" data-score="p2" value="${has(w.p2)?w.p2:''}" ${dis}></label>
+          <div class="tot"><b>${t===null?'-':t}</b><small style="color:var(--muted)"> /20</small></div></div>
+          <button class="linkbtn" data-open="rose:${esc(w.id)}">${isOpen('rose',w.id)?'Hide details':'Edit details and notes'}</button>
+          ${isOpen('rose',w.id)?editorHtml('rose',w):''}</div>`;
+      });
+      h+=`</div>${S.readOnly?'':`<button class="add" data-roseadd="${esc(r)}">Add a wine to ${esc(shortRound(r))}</button>`}`;
+    });
+    if(!S.readOnly) h+=`<div><button class="add" data-roundadd>Add a round</button></div>`;
+    return h;
+  }
+
+  /* ---------- nights out ---------- */
+  function renderNights(){
+    const all=byOrder(S.d.nights);
+    let h=`<p class="substats">Places for the night before and the night after.</p>`;
+    all.forEach(v=>{
+      const sub=[v.prePost?(v.prePost==='Pre'?'Night before':'Night after'):'', v.contact, v.price].filter(Boolean).join(', ');
+      h+=`<div class="row ${v.booked?'done':''}"><div class="row-main">${tickBtn('nights',v,'booked','Mark '+v.name+' as booked')}<button class="line" data-open="nights:${esc(v.id)}" aria-expanded="${isOpen('nights',v.id)}"><span class="t"><b>${esc(v.name)}</b>${sub?`<small>${esc(sub)}</small>`:''}</span>${v.booked?'<span class="pills"><span class="pill good">Booked</span></span>':''}</button></div>
+        ${isOpen('nights',v.id)?editorHtml('nights',v):''}${v.deals&&!isOpen('nights',v.id)?'':''}</div>`;
+    });
+    if(!S.readOnly) h+=`<button class="add" data-add="nights">Add a place</button>`;
+    return h;
+  }
+
+  /* ---------- main render ---------- */
+  function renderHeader(){
+    const w=S.meta.wedding;
+    if(!w || !w.date){
+      if(!S.ready.meta || document.getElementById('setupDate')) return;
+      $('#when').innerHTML=S.readOnly?'':`<span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="date" id="setupDate" aria-label="Wedding date" style="width:auto"><input type="text" id="setupVenue" placeholder="Venue" aria-label="Venue" style="width:180px"><button class="btn" id="setupSave">Set your wedding date and venue</button></span>`;
+      $('#countdown').innerHTML='';
+      $('#setupSave').onclick=()=>{ const date=$('#setupDate').value; if(!date){ status('Pick a date first'); return; } const venue=$('#setupVenue').value.trim(); S.meta.wedding={date,venue}; setDoc('meta/wedding',{date,venue}); render(); };
+      return;
+    }
+    const d=new Date(w.date+'T12:00:00');
+    $('#when').textContent=`${d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}${w.venue?' at '+w.venue:''}`;
+    const today=new Date(); today.setHours(12,0,0,0);
+    const days=Math.round((d-today)/86400000);
+    $('#countdown').innerHTML = days>0?`<b>${days}</b><span>days to go</span>`:days===0?`<b>Today</b><span>Congratulations</span>`:'';
+  }
+  function render(){
+    renderHeader();
+    $('#tabs').innerHTML=TABS.map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${S.tab===k}">${l}</button>`).join('');
+    if(!db){ view.innerHTML=`<div class="notice">Saving isn't available in this browser.</div>`; return; }
+    const need={tasks:['tasks'],vendors:['vendors'],guests:['guests','ceremony'],addresses:['addresses'],seating:['tables'],menu:['guests','ceremony','meals','meta'],day:['lists'],photos:['shots'],rose:['rose','meta']}[S.tab];
+    if(!need.every(k=>S.ready[k])){ view.innerHTML='<p class="empty">Loading...</p>'; return; }
+    const y=window.scrollY;
+    view.innerHTML=({tasks:renderTasks,vendors:renderVendors,guests:renderGuests,addresses:renderAddresses,seating:renderSeating,menu:renderMenu,day:renderDay,photos:renderPhotos,rose:renderRose})[S.tab]();
+    window.scrollTo(0,y);
+  }
+
+  /* ---------- events ---------- */
+  $('#tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-tab]'); if(!b) return; S.tab=b.dataset.tab; S.open=null; pending=false; render(); const st=$('#sticky'); if(window.scrollY>st.offsetTop) window.scrollTo(0,st.offsetTop); b.scrollIntoView({inline:'nearest',block:'nearest'}); });
+
+  const find=(col,id)=>S.d[col].find(x=>x.id===id);
+  view.addEventListener('click',e=>{
+    const t=e.target, c=s=>t.closest(s);
+    let b;
+    if(b=c('[data-chip]')){ const [k,v]=b.dataset.chip.split(':'); if(k==='task') S.taskFilter=v; if(k==='glist'){ S.gList=v; S.open=null; } if(k==='gfilter') S.gFilter=v; if(k==='afilter') S.aFilter=v; if(k==='mlist') S.mList=v; render(); return; }
+    if(b=c('[data-open]')){ const v=b.dataset.open; S.open=S.open===v?null:v; render(); return; }
+    if(b=c('[data-tick]')){ const [col,id,f]=b.dataset.tick.split(':'); const r=find(col,id); if(r){ r[f]=!r[f]; render(); upd(col+'/'+id,{[f]:r[f]}); } return; }
+    if(b=c('[data-del]')){ const [col,id]=b.dataset.del.split(':'); const r=find(col,id); const label=r&&(r.title||r.name||r.category)||'this';
+      if(confirm(`Delete "${label}"?`)){ S.d[col]=S.d[col].filter(x=>x.id!==id); S.open=null; render(); del(col+'/'+id); } return; }
+    if(b=c('[data-add]')){ const col=b.dataset.add;
+      const blanks={tasks:{title:'New task',details:'',links:'',status:'',who:'',done:false},vendors:{category:'New vendor',name:'',contact:'',email:'',phone:'',notes:'',links:'',booked:false,deposit:false,contract:false},
+        guests:{name:'New guest',group:'',rsvp:'Unconfirmed',dietary:'',table:'',famFriend:'Friend',whose:'Bride',evening:false,gift:false,giftDetails:'',thankYou:false,saveTheDate:false},
+        ceremony:{name:'New guest',group:'',rsvp:'Unconfirmed',dietary:'',table:'',famFriend:'Friend',whose:'Bride',evening:false,gift:false,giftDetails:'',thankYou:false,contact:''},
+        addresses:{names:'',addressName:'',line1:'',line2:'',town:'',county:'',postcode:'',country:'',sent:false,evening:false,notes:''},
+        nights:{name:'New place',prePost:'Post',contact:'',price:'',pros:'',cons:'',deals:'',booked:false}};
+      if(col==='tasks') S.taskFilter='todo';
+      if(col===S.gList){ S.gFilter='all'; S.gSearch=''; }
+      if(col==='addresses'){ S.aFilter='all'; S.aSearch=''; }
+      addRow(col,blanks[col]); return; }
+    // menu dishes
+    if(c('[data-dishedit]')){ S.dishEdit=!S.dishEdit; render(); return; }
+    if(b=c('[data-dishadd]')){ const k=b.dataset.dishadd; const md={...(S.meta.menu||{})}; md[k]=[...(md[k]||[]),'']; saveDishes(md); render(); const ins=view.querySelectorAll(`[data-dish^="${k}:"]`); if(ins.length) ins[ins.length-1].focus(); return; }
+    if(b=c('[data-dishdel]')){ const [k,i]=b.dataset.dishdel.split(':'); const md={...(S.meta.menu||{})}; md[k]=(md[k]||[]).filter((_,j)=>j!==+i); saveDishes(md); render(); return; }
+    // photos
+    if(b=c('[data-shotadd]')){ addRow('shots',{group:b.dataset.shotadd,title:'New shot',people:'',notes:'',done:false}); return; }
+    if(c('[data-shotgroup]')){ const name=prompt('Name of the group, for example "Friends"'); if(name && name.trim()) addRow('shots',{group:name.trim(),title:'New shot',people:'',notes:'',done:false}); return; }
+    // seating
+    if(c('[data-seatedit]')){ S.seatEdit=!S.seatEdit; render(); return; }
+    if(c('[data-tadd]')){ const id=newId('tb'); const rec={name:'Table '+(S.d.tables.length+1),note:'',guests:[],order:nextOrder(S.d.tables)}; S.d.tables.push({id,...rec}); render(); setDoc('tables/'+id,rec); return; }
+    if(b=c('[data-tdel]')){ const tb=find('tables',b.dataset.tdel); if(tb && confirm(`Delete ${tb.name} and its guest list?`)){ S.d.tables=S.d.tables.filter(x=>x.id!==tb.id); render(); del('tables/'+tb.id); } return; }
+    if(b=c('[data-tgadd]')){ const tb=find('tables',b.dataset.tgadd); if(tb){ tb.guests=[...(tb.guests||[]),{name:'',dietary:''}]; render(); saveTable(tb); const ins=view.querySelectorAll(`[data-table="${tb.id}"] [data-tg$=":name"]`); if(ins.length) ins[ins.length-1].focus(); } return; }
+    if(b=c('[data-tgdel]')){ const [id,i]=b.dataset.tgdel.split(':'); const tb=find('tables',id); if(tb){ tb.guests=(tb.guests||[]).filter((_,j)=>j!==+i); render(); saveTable(tb); } return; }
+    // lists
+    if(b=c('[data-ledit]')){ const k=b.dataset.ledit; S.listEdit[k]=!S.listEdit[k]; render(); return; }
+    if(b=c('[data-ladd]')){ const k=b.dataset.ladd; const L=S.lists[k]||(S.lists[k]={items:[]}); const items=[...(L.items||[])];
+      const last=items[items.length-1]; items.push(k==='songs'?{part:last?last.part:'',moment:'',song:''}:{time:'',what:''}); S.lists[k]={...L,items}; render(); saveList(k);
+      const ins=view.querySelectorAll(`[data-list="${k}"]`); const lastRow=ins[ins.length-1]; if(lastRow){ const i=lastRow.querySelector(k==='songs'?'[data-lf="song"]':'input'); if(i) i.focus(); } return; }
+    if(b=c('[data-ldel]')){ const [k,i]=b.dataset.ldel.split(':'); const L=S.lists[k]; if(L){ S.lists[k]={...L,items:L.items.filter((_,j)=>j!==+i)}; render(); saveList(k); } return; }
+    // rose
+    if(b=c('[data-roseadd]')){ addRow('rose',{round:b.dataset.roseadd,name:'New wine',region:'',grapes:'',style:'',taste:'',price:'',p1:null,p2:null,notes:''}); return; }
+    if(c('[data-roundadd]')){ const name=prompt('Name of the round, for example "Round 2 - Red vs white"'); if(name && name.trim()){ const m=S.meta.rose||{}; const rounds=[...roundsList(), name.trim()]; S.meta.rose={...m,rounds}; render(); upd('meta/rose',{rounds}); } return; }
+  });
+
+  view.addEventListener('input',e=>{ if(e.target.id==='gsearch'){ S.gSearch=e.target.value; const l=$('#glist'); if(l) l.innerHTML=guestRows(); } if(e.target.id==='asearch'){ S.aSearch=e.target.value; const l=$('#alist'); if(l) l.innerHTML=addrRows(); } });
+
+  view.addEventListener('change',e=>{
+    const t=e.target;
+    const ed=t.closest('.editor');
+    if(ed && t.dataset.f){
+      const col=ed.dataset.col, id=ed.dataset.id, f=t.dataset.f; const v=t.type==='checkbox'?t.checked:t.value;
+      const r=find(col,id); if(r) r[f]=v; upd(col+'/'+id,{[f]:v});
+      if(t.type==='checkbox' || t.tagName==='SELECT'){ pending=false; render(); } else pending=true;
+      return;
+    }
+    if(t.dataset.dish){ const [k,i]=t.dataset.dish.split(':'); const md={...(S.meta.menu||{})}; md[k]=(md[k]||[]).map((d,j)=>j===+i?t.value.trim():d); saveDishes(md); pending=true; return; }
+    const mg=t.closest('[data-mealg]');
+    if(mg && t.dataset.meal){ saveMeal(mg.dataset.mealg,{[t.dataset.meal]:t.tagName==='SELECT'?t.value:t.value.trim()}); if(t.tagName==='SELECT'){ pending=false; render(); } else pending=true; return; }
+    const card=t.closest('[data-table]');
+    if(card){ const tb=find('tables',card.dataset.table); if(!tb) return;
+      if(t.dataset.tf){ tb[t.dataset.tf]=t.value; }
+      if(t.dataset.tg){ const [i,f]=t.dataset.tg.split(':'); tb.guests=(tb.guests||[]).map((g,j)=>j===+i?{...g,[f]:t.value}:g); }
+      saveTable(tb); pending=true; return; }
+    const lr=t.closest('[data-list]');
+    if(lr && t.dataset.lf){ const k=lr.dataset.list, i=+lr.dataset.i; const L=S.lists[k]; if(!L) return;
+      S.lists[k]={...L,items:L.items.map((it,j)=>j===i?{...it,[t.dataset.lf]:t.value}:it)}; saveList(k); pending=true; return; }
+    const wine=t.closest('[data-wine]');
+    if(wine && t.dataset.score){ const w=find('rose',wine.dataset.wine); if(!w) return;
+      let v=t.value.trim()===''?null:parseFloat(t.value); if(v!==null && (!isFinite(v)||v<0||v>10)){ status('Scores are out of 10'); t.value=has(w[t.dataset.score])?w[t.dataset.score]:''; return; }
+      w[t.dataset.score]=v; upd('rose/'+w.id,{[t.dataset.score]:v}); pending=true; return; }
+    if(t.id==='chosenSel' && t.value){ const m=S.meta.rose||{}; S.meta.rose={...m,chosen:t.value}; render(); upd('meta/rose',{chosen:t.value}); return; }
+  });
+
+  const stickyEl=$('#sticky');
+  window.addEventListener('scroll',()=>stickyEl.classList.toggle('stuck', stickyEl.getBoundingClientRect().top<=0.5 && window.scrollY>0),{passive:true});
+
+  /* ---------- boot ---------- */
+  render();
+  (async()=>{
+    try{ db = window.claude && window.claude.use ? await window.claude.use('db') : null; }catch(e){ db=null; }
+    if(!db){ render(); return; }
+    const err=e=>{ if(e && e.code==='revoked'){ db=null; render(); } };
+    COLS.forEach(col=>db.collection(col).onSnapshot(snap=>{ S.d[col]=snap.docs.map(d=>({id:d.id,...d.data()})); S.ready[col]=true; schedule(); },err));
+    db.collection('lists').onSnapshot(snap=>{ S.lists={}; snap.docs.forEach(d=>{ S.lists[d.id]={...d.data()}; }); S.ready.lists=true; schedule(); },err);
+    db.collection('meta').onSnapshot(snap=>{ S.meta={}; snap.docs.forEach(d=>{ S.meta[d.id]={...d.data()}; }); S.ready.meta=true; schedule(); },err);
+  })();
+})();
+</script>
+</body>
+</html>

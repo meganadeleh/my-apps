@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skin and health tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7ECEE; --panel:#FFFFFF; --ink:#2A1A2D; --muted:#7B6780; --line:#EAD7DC;
+  --red:#D6304C; --redsoft:#F9D9DF; --blue:#3569DB; --bluesoft:#DCE6FB;
+  --sage:#5E9474; --sagesoft:#DDEDE2; --amber:#C98613; --ambersoft:#FBEBCB;
+  --plum:#8A3F8F; --plumsoft:#F1DDF1; --brown:#8A5A2B; --brownsoft:#F1E3D3;
+  --bead-off:#EFDDE2;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1220; --panel:#261A2C; --ink:#F5E9EF; --muted:#B39DB8; --line:#3A2A41;
+    --red:#FF5873; --redsoft:#4A1E2A; --blue:#7FA2FF; --bluesoft:#1F2A4A;
+    --sage:#86C29E; --sagesoft:#1E3328; --amber:#F2B347; --ambersoft:#3D2E12;
+    --plum:#D98ADF; --plumsoft:#3B2140; --brown:#D9A36B; --brownsoft:#3A2A1C;
+    --bead-off:#3A2A41;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1220; --panel:#261A2C; --ink:#F5E9EF; --muted:#B39DB8; --line:#3A2A41;
+  --red:#FF5873; --redsoft:#4A1E2A; --blue:#7FA2FF; --bluesoft:#1F2A4A;
+  --sage:#86C29E; --sagesoft:#1E3328; --amber:#F2B347; --ambersoft:#3D2E12;
+  --plum:#D98ADF; --plumsoft:#3B2140; --brown:#D9A36B; --brownsoft:#3A2A1C;
+  --bead-off:#3A2A41;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:18px 18px 64px}
+h1,h2,h3{font-family:"Young Serif",Georgia,"Times New Roman",serif;font-weight:400;margin:0;line-height:1.15}
+h1{font-size:clamp(28px,6vw,38px)}
+h2{font-size:22px;margin-bottom:12px}
+p{margin:0}
+.muted{color:var(--muted)} .small{font-size:14px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+input[type=date]{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:6px 8px}
+
+/* Tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0 10px;margin:0 -18px 14px;padding-left:18px;padding-right:18px;overflow-x:auto}
+.tabs-in{display:flex;gap:6px;min-width:max-content}
+.tab{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:6px 0 16px}
+.sync{font-size:13px;color:var(--muted)}
+.view{display:none}.view.on{display:block}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:20px;margin-bottom:16px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:9px 14px;font-weight:600;font-size:14px}
+.btn.solid{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.small{padding:6px 11px}
+.btn.danger{color:var(--red)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:8px 10px}
+
+/* Dashboard */
+.dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.dcard{text-align:left;border:0;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:6px;min-height:150px;background:var(--panel);border:1px solid var(--line);position:relative;overflow:hidden}
+.dcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--acc)}
+.dcard .dt{font-weight:700;font-size:14px;color:var(--acc);display:flex;gap:6px;align-items:center}
+.dcard .big{font-family:"Young Serif",Georgia,serif;font-size:24px;line-height:1.2}
+.dcard .go{margin-top:auto;font-size:13px;color:var(--muted);font-weight:600}
+
+/* Mask hero */
+.mode-pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:5px 12px;font-weight:600;font-size:14px}
+.mode-ageing{background:var(--redsoft);color:var(--red)}
+.mode-blemish{background:var(--bluesoft);color:var(--blue)}
+.mode-sustain{background:var(--sagesoft);color:var(--sage)}
+.mask-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.count{display:flex;align-items:baseline;gap:8px;margin:14px 0 4px}
+.count b{font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:64px;line-height:1}
+.beads{display:grid;grid-template-columns:repeat(14,1fr);gap:7px;margin:18px 0 8px}
+.bead{aspect-ratio:1;border-radius:50%;background:var(--bead-off);transition:background .3s,box-shadow .3s}
+.bead.on{background:var(--beadc);box-shadow:0 0 8px 1px var(--beadglow)}
+.week-labels{display:grid;grid-template-columns:repeat(4,1fr);font-size:12px;color:var(--muted);margin-bottom:14px}
+.note{border-radius:16px;padding:12px 14px;font-size:15px;margin-top:10px}
+.note-red{background:var(--redsoft)} .note-blue{background:var(--bluesoft)} .note-sage{background:var(--sagesoft)} .note-amber{background:var(--ambersoft)} .note-plum{background:var(--plumsoft)}
+
+/* Week strip */
+.strip-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px}
+.day{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:10px 4px 9px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.day .dn{font-size:12px;color:var(--muted);font-weight:600}
+.day .dd{font-family:"Young Serif",Georgia,serif;font-size:19px;line-height:1}
+.tag{font-size:11px;font-weight:700;border-radius:999px;padding:2px 6px;white-space:nowrap}
+.day .ticks{display:flex;gap:3px;height:6px}
+.day .ticks i{width:6px;height:6px;border-radius:50%;background:var(--bead-off)}
+.day .ticks i.on{background:var(--sage)} .day .ticks i.miss{background:var(--red)}
+.day.sel{border-color:var(--ink);border-width:2px;padding:9px 3px 8px}
+.day.is-today .dn{color:var(--ink)}
+.t-B{background:var(--ambersoft);color:var(--amber)}
+.t-A{background:var(--bluesoft);color:var(--blue)}
+.t-L{background:var(--redsoft);color:var(--red)}
+.t-C{background:var(--sagesoft);color:var(--sage)}
+
+.plan-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px}
+.section-label{font-weight:700;font-size:15px;margin:18px 0 8px}
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+ol.steps li:first-child{border-top:0}
+ol.steps li::before{content:counter(s);width:24px;height:24px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--muted);margin-top:1px}
+ol.steps li.hl::before{background:var(--ink);color:var(--bg)}
+.step-name{font-weight:600}
+.step-why{font-size:14px;color:var(--muted)}
+.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:14px}
+.check{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:11px 12px;background:var(--panel);text-align:left;font-weight:600;font-size:14px}
+.check .box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center}
+.check.on{background:var(--sagesoft);border-color:var(--sage)}
+.check.on .box{background:var(--sage);border-color:var(--sage)}
+.check.on .box::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.check.miss.on{background:var(--redsoft);border-color:var(--red)}
+.check.miss.on .box{background:var(--red);border-color:var(--red)}
+.check.miss.on .box::after{content:"✕";border:0;transform:none;width:auto;height:auto;color:#fff;font-size:13px;font-weight:700}
+.water{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:14px}
+.drop{width:26px;height:30px;border:0;background:none;padding:0}
+.drop svg{width:100%;height:100%} .drop path{fill:var(--bead-off);transition:fill .2s} .drop.on path{fill:var(--blue)}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{display:grid;grid-template-columns:14px 1fr;gap:12px;padding-bottom:14px;position:relative}
+.timeline li::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--dot);margin-top:5px}
+.timeline li:not(:last-child)::after{content:"";position:absolute;left:5px;top:20px;bottom:0;width:2px;background:var(--line)}
+.when{font-size:14px;color:var(--muted)}
+details{border-top:1px solid var(--line);padding:12px 0} details:first-of-type{border-top:0}
+summary{cursor:pointer;font-weight:600}
+.acc{padding:4px 20px}
+.acc details{padding:0}
+.acc summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 0;font-size:16px}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary::after{content:"";width:9px;height:9px;border:solid var(--muted);border-width:0 2px 2px 0;transform:rotate(45deg);margin-left:6px;transition:transform .2s;flex:none}
+.acc details[open] summary::after{transform:rotate(-135deg)}
+.acc summary .sm{margin-left:auto;font-size:13px;color:var(--muted);font-weight:500}
+.acc details > :not(summary){margin-bottom:16px}
+
+/* Date bar */
+.datebar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.datebar .lbl{font-family:"Young Serif",Georgia,serif;font-size:22px;text-align:center;flex:1}
+.arrow{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);font-size:18px;font-weight:700}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--c);background:transparent;color:var(--ink);border-radius:999px;padding:8px 14px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px}
+.chip::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c)}
+.chip[aria-pressed="true"]{background:var(--c);color:#fff}
+.chip[aria-pressed="true"]::before{background:#fff}
+
+/* Calendar */
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .wd{font-size:12px;color:var(--muted);text-align:center;font-weight:600;padding-bottom:4px}
+.cell{aspect-ratio:1;border-radius:12px;border:1px solid transparent;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:14px;padding:2px;min-width:0}
+.cell.blank{background:none}
+.cell.today{border-color:var(--ink)}
+.cell.sel{border:2px solid var(--blue)}
+.cell .dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:100%}
+.cell .dots i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.cell.period{background:var(--red);color:#fff;font-weight:700}
+.cell.predict{background:var(--redsoft);border:1.5px dashed var(--red)}
+.cell .num{font-size:10px;font-weight:700;color:var(--brown)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:13px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:4px}
+.stat{background:var(--bg);border-radius:16px;padding:12px 14px}
+.stat b{display:block;font-family:"Young Serif",Georgia,serif;font-weight:400;font-size:28px;line-height:1.1}
+.stat span{font-size:13px;color:var(--muted)}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.list li:first-child{border-top:0}
+.big-btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.bigb{border:0;border-radius:18px;padding:16px;font-weight:700;font-size:16px;color:#fff;background:var(--c)}
+.empty{color:var(--muted);font-size:15px}
+
+/* Home gym + quick ticks */
+.gt-card{padding-top:14px;padding-bottom:10px}
+.gt-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.gt-d{width:74px;flex:none;font-size:14px}
+.gt-row .up-w{flex:1;min-width:0}
+.pb-btn.sm{padding:5px 12px;font-size:12px}
+.gt-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 4px}
+.gt-state{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--bluesoft);color:var(--blue)}
+.gt-state.done{background:var(--sagesoft);color:var(--sage)}
+.gt-none{font-family:"Young Serif",Georgia,serif;font-size:19px}
+.gt-acts{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap}
+.gt-link{border:0;background:none;color:var(--blue);font-weight:700;font-size:13px;padding:4px 0}
+.gt-up{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.gt-up .up-row{padding:7px 0}
+.qt-row{display:flex;flex-wrap:wrap;gap:8px}
+.qt{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:7px 12px 7px 8px;font-weight:600;font-size:13px}
+.qt .tb-box{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);background:var(--panel);flex:none;display:grid;place-items:center}
+.qt.on{background:var(--sagesoft);border-color:transparent;color:var(--muted)}
+.qt.on .tb-box{background:var(--sage);border-color:var(--sage)}
+.qt.on .tb-box::after{content:"";width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+/* Gym planning */
+.cell .dots i.ring{background:transparent;border:1.5px solid var(--c);width:7px;height:7px;box-sizing:border-box}
+.cell.future{background:transparent;border:1px dashed var(--line)}
+.cell.future.sel{border:2px solid var(--blue)}
+.plan-note{font-size:13px;color:var(--muted);margin:0 0 8px;text-align:center}
+.plan-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;border-radius:14px;background:var(--bluesoft)}
+.plan-bar .pb-t{flex:1;min-width:0;font-size:14px}
+.pb-btn{border:0;border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px;background:var(--blue);color:#fff}
+.up-list{list-style:none;margin:8px 0 0;padding:0}
+.up-list li{border-top:1px solid var(--line)}
+.up-list li:first-child{border-top:0}
+.up-row{width:100%;display:flex;align-items:center;gap:12px;padding:10px 0;border:0;background:none;color:var(--ink);text-align:left}
+.up-day{width:52px;flex:none;line-height:1.15}
+.up-day b{display:block;font-size:15px}
+.up-day span{font-size:12px;color:var(--muted)}
+.up-w{flex:1;display:flex;flex-wrap:wrap;gap:6px}
+.up-tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 10px;border-radius:999px;border:1.5px solid var(--c)}
+.up-tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+/* Sticky gym logger */
+.sticky-log{position:sticky;top:var(--tabsH,62px);z-index:4;padding:12px 14px;box-shadow:0 8px 20px -12px rgba(42,26,45,.35)}
+.sticky-log .datebar{margin-bottom:10px}
+.sticky-log .datebar .lbl{font-size:18px}
+.sticky-log .arrow{width:34px;height:34px;font-size:16px}
+.sticky-log .chip{padding:6px 11px;font-size:13px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.wk-list{list-style:none;margin:10px 0 0;padding:0}
+.wk-list li{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.wk-list li:first-child{border-top:0}
+.wk-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--c);flex:none}
+.wk-list li.on .wk-dot{background:var(--c)}
+.wk-n{flex:1;font-weight:600}
+.wk-list li:not(.on) .wk-n{color:var(--muted)}
+.gopts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.gopt{border:2px solid var(--line);background:var(--panel);border-radius:14px;padding:10px 8px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.gopt b{font-size:14px}
+.gopt span{font-size:12px;color:var(--muted)}
+.gopt[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--panel))}
+.ins{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:16px 18px;margin-bottom:12px;border-left:6px solid var(--acc)}
+.ins.lv-good{background:var(--soft);border-color:transparent;border-left-color:var(--acc)}
+.ins.lv-empty{opacity:.7}
+.ins-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px;font-size:12px;font-weight:700}
+.ins-area{color:var(--acc)}
+.ins-lv{color:var(--muted)}
+.lv-watch .ins-lv{color:var(--red)}
+.ins-tips{margin:10px 0 0;padding-left:18px;font-size:14px}
+.ins-tips li{margin-bottom:4px}
+/* New home */
+.hero{background:var(--ink);color:var(--bg);border-radius:32px;padding:26px 22px 22px;margin-bottom:14px;position:relative;overflow:hidden}
+.hero .hi{font-family:"Young Serif",Georgia,serif;font-size:clamp(30px,7vw,42px);line-height:1.1}
+.hero .date{opacity:.7;margin-top:4px}
+.hero .tonight{margin-top:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.hero .tn-label{font-size:13px;opacity:.7;font-weight:600}
+.hero .tn-big{font-family:"Young Serif",Georgia,serif;font-size:24px}
+.hero .ring{width:74px;height:74px;flex:none}
+.hero .ring circle{fill:none;stroke-width:8}
+.hero .ring .bg{stroke:rgba(255,255,255,.14)}
+:root[data-theme="dark"] .hero .ring .bg{stroke:rgba(0,0,0,.14)}
+.hero .ring .fg{stroke:var(--red);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .6s}
+.hero .ring text{fill:currentColor;font-family:"Young Serif",Georgia,serif;font-size:20px}
+.hero .minibeads{display:grid;grid-template-columns:repeat(28,1fr);gap:4px;margin-top:18px}
+.hero .minibeads span{aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.14)}
+.hero .minibeads span.on{background:var(--beadc);box-shadow:0 0 6px var(--beadc)}
+.hero .mb-cap{font-size:13px;opacity:.75;margin-top:8px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .hero .ring .bg,:root:not([data-theme="light"]) .hero .minibeads span:not(.on){background:rgba(0,0,0,.12);stroke:rgba(0,0,0,.14)}}
+.todo-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.todo{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.todo-item{width:100%;display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:14px;padding:12px 14px;text-align:left;font-weight:600;font-size:15px}
+.todo-item .tb-box{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);background:var(--panel);flex:none;display:grid;place-items:center}
+.todo-item.on{background:var(--sagesoft);border-color:transparent}
+.todo-item.on span:last-child{text-decoration:line-through;color:var(--muted)}
+.todo-item.on .tb-box{background:var(--sage);border-color:var(--sage)}
+.todo-item.on .tb-box::after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.alert{display:flex;align-items:center;gap:12px;border-radius:20px;padding:14px 16px;margin-bottom:12px;flex-wrap:wrap}
+.al-plum{background:var(--plumsoft)} .al-sage{background:var(--sagesoft)}
+.al-ic{font-size:24px}
+.alert > div{flex:1;min-width:160px}
+.quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.gutrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.gut-e{display:flex;gap:4px}
+.gbtn{border:0;background:var(--panel);font-size:22px;line-height:1;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;padding:0}
+.gbtn:hover{background:var(--bg)}
+.gutbox{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;background:var(--ambersoft);border-radius:16px;padding:10px 12px}
+.gut-l{font-weight:700;font-size:14px;color:var(--amber)}
+.gut-e{display:flex;gap:6px}
+.qbtn{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:8px 12px;display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px}
+.qbtn .qe{font-size:22px;line-height:1}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{border:0;text-align:left;border-radius:26px;padding:16px;background:var(--soft);color:var(--ink);display:flex;flex-direction:column;gap:4px;min-height:168px}
+.tile .ic{width:38px;height:38px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-size:19px;margin-bottom:6px}
+.tile .tl{font-size:13px;font-weight:700;color:var(--acc)}
+.tile .tb{font-family:"Young Serif",Georgia,serif;font-size:20px;line-height:1.2}
+.tile .ts{font-size:13px;color:var(--muted)}
+.tile .viz{margin-top:auto;padding-top:10px;display:flex;gap:4px;align-items:flex-end}
+.tile .viz i{flex:1;height:8px;border-radius:4px;background:var(--panel)}
+.tile .viz i.on{background:var(--acc)}
+.tile .viz .vd{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tile .viz .vd i{width:100%;flex:none}
+.tile .viz .vd b{font-size:10px;font-weight:600;color:var(--muted)}
+.tile .viz .vt b{color:var(--ink);font-weight:800}
+@media (max-width:380px){.tiles{grid-template-columns:1fr}.tile{min-height:0}}
+footer{font-size:13px;color:var(--muted);text-align:center;margin-top:24px}
+@media (max-width:420px){.tag{font-size:10px;padding:2px 4px}.beads{gap:5px}.cell{border-radius:9px;font-size:13px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="tabs" aria-label="Sections"><div class="tabs-in" id="tabs" role="tablist"></div></nav>
+  <header>
+    <div><h1 id="pageTitle"></h1><p class="muted" id="todayLine"></p></div>
+    <span class="sync" id="sync">Saved on this device</span>
+  </header>
+  <section class="view" id="v-home"></section>
+  <section class="view" id="v-skin"></section>
+  <section class="view" id="v-gym"></section>
+  <section class="view" id="v-period"></section>
+  <section class="view" id="v-poo"></section>
+  <section class="view" id="v-insights"></section>
+  <footer>Tap any day to log it. Everything saves as you go.</footer>
+</div>
+
+<script>
+/* Standalone storage: when this page runs outside claude.ai, everything is saved
+   in this browser's localStorage. Nothing is sent anywhere. */
+(function(){
+  if (window.claude && window.claude.use) return;
+  var KEY = 'app-data:' + location.pathname;
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { store = {}; }
+  var listeners = [];
+  function persist(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+  function clone(v){ return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
+  function norm(p){ return String(p).replace(/^\/+|\/+$/g, ''); }
+  function notify(){ setTimeout(function(){ listeners.slice().forEach(function(l){ try { l(); } catch (e) {} }); }, 0); }
+  function docSnap(path){
+    var has = Object.prototype.hasOwnProperty.call(store, path);
+    var id = path.split('/').pop();
+    return { id: id, exists: has, metadata: { hasPendingWrites: false },
+      data: function(){ return has ? clone(store[path]) : undefined; }, ref: docRef(path) };
+  }
+  function docRef(p){
+    var path = norm(p);
+    return {
+      id: path.split('/').pop(), path: path,
+      get: function(){ return Promise.resolve(docSnap(path)); },
+      set: function(d){ store[path] = clone(d) || {}; persist(); notify(); return Promise.resolve(); },
+      update: function(patch){ store[path] = Object.assign({}, store[path] || {}, clone(patch)); persist(); notify(); return Promise.resolve(); },
+      delete: function(){ delete store[path]; persist(); notify(); return Promise.resolve(); },
+      onSnapshot: function(cb){
+        var last = null;
+        var fire = function(){ var s = JSON.stringify(store[path]); if (s === last) return; last = s; cb(docSnap(path)); };
+        listeners.push(fire); setTimeout(fire, 0);
+        return function(){ listeners = listeners.filter(function(x){ return x !== fire; }); };
+      }
+    };
+  }
+  function colSnap(path){
+    var pre = path + '/';
+    var docs = Object.keys(store).filter(function(k){ return k.indexOf(pre) === 0 && k.slice(pre.length).indexOf('/') < 0; })
+      .sort().map(function(k){ return docSnap(k); });
+    return { docs: docs, size: docs.length, empty: !docs.length, forEach: function(f){ docs.forEach(f); } };
+  }
+  function colRef(p){
+    var path = norm(p);
+    return {
+      path: path,
+      doc: function(id){ return docRef(path + '/' + (id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)))); },
+      get: function(){ return Promise.resolve(colSnap(path)); },
+      onSnapshot: function(cb){
+        var last = null;
+        var fire = function(){ var s = colSnap(path); var sig = JSON.stringify(s.docs.map(function(d){ return [d.id, store[path + '/' + d.id]]; })); if (sig === last) return; last = sig; cb(s); };
+        listeners.push(fire); setTimeout(fire, 0);
+        return function(){ listeners = listeners.filter(function(x){ return x !== fire; }); };
+      }
+    };
+  }
+  var db = { doc: docRef, collection: colRef };
+  var user = { id: function(){ return Promise.resolve('local'); } };
+  var downloads = { save: function(o){
+    var blob = o.data instanceof Blob ? o.data : new Blob([o.data], { type: o.mimeType || 'application/octet-stream' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = o.filename || 'download';
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return Promise.resolve();
+  } };
+  window.claude = { use: function(name){
+    if (name === 'db') return Promise.resolve(db);
+    if (name === 'user') return Promise.resolve(user);
+    if (name === 'downloads') return Promise.resolve(downloads);
+    return Promise.resolve(null);
+  } };
+})();
+</script>
+<script>
+(function(){
+"use strict";
+var COURSE_LEN = 56, DOC_ID = "skin-state", LS_KEY = "skin-tracker-v1";
+
+var MODES = {
+  ageing:  {name:"Anti-ageing",  mins:10, cls:"mode-ageing",  c:"var(--red)",  glow:"rgba(214,48,76,.45)"},
+  blemish: {name:"Clear skin", mins:10, cls:"mode-blemish", c:"var(--blue)", glow:"rgba(53,105,219,.45)"},
+  sustain: {name:"Maintenance",   mins:5, cls:"mode-sustain", c:"var(--sage)", glow:"rgba(94,148,116,.45)"}
+};
+var NIGHT = {0:"B",1:"A",2:"C",3:"L",4:"C",5:"B",6:"A"};
+var LACTIC_DAY = 3; // Wednesday
+function lastLactic(upto){var best=null;Object.keys(state.log).forEach(function(k){if(state.log[k].lactic&&k<=upto&&(!best||k>best))best=k;});return best;}
+function lacticDue(){
+  var last=lastLactic(TODAY);
+  if(!last) { var d=new Date(today); while(d.getDay()!==LACTIC_DAY) d=addDays(d,1); return key(d); }
+  var n=addDays(fromKey(last),5); while(n.getDay()!==LACTIC_DAY) n=addDays(n,1);
+  var nk=key(n); return nk<TODAY?TODAY:nk;
+}
+function isLactic(k){
+  if(state.log[k]&&state.log[k].lactic) return true;
+  if(k<TODAY) return false;
+  return k===lacticDue();
+}
+function nightType(d){
+  var k=key(d);
+  if(isLactic(k)) return "L";
+  var b=NIGHT[d.getDay()];
+  if(b==="L") return "C";
+  if(isLactic(key(addDays(d,-1)))) return "C";
+  return b;
+}
+var NIGHT_INFO = {
+  A:{short:"Salicylic", title:"Salicylic night", why:"Clears congestion and under-skin bumps", active:null},
+  B:{short:"Retinol", title:"Retinol night", why:"Cell turnover and smoother texture", active:null},
+  C:{short:"Plain", title:"Plain night", why:"No actives, just hydration and recovery", active:null},
+  L:{short:"Lactic", title:"Lactic acid night", why:"Gentle exfoliant, brightens and smooths", active:"Lactic acid"}
+};
+var EYE_DAY = 6, TOPUP_DAY = 6;
+var GYM = [
+  {id:"push",   name:"Push",       c:"#E0476B"},
+  {id:"legs",   name:"Legs", c:"#E8912D"},
+  {id:"pull",   name:"Pull",             c:"#3F7BE0"},
+  {id:"cardio", name:"Cardio",      c:"#15A39C"},
+  {id:"core",   name:"Core",     c:"#9A5BD8"},
+  {id:"yoga",   name:"Yoga",              c:"#E65FB4"},
+  {id:"extra",  name:"Extra",            c:"#7F8F2A"}
+];
+var REST_C = "#9C8FA0";
+var QUICK = [
+  {id:"good", name:"Good", emoji:"😄", c:"#4FA36B", hint:""},
+  {id:"meh",  name:"Okay", emoji:"😐", c:"#D9A63A", hint:""},
+  {id:"bad",  name:"Bad",    emoji:"😖", c:"#D6485E", hint:""}
+];
+var AMT=[{id:"small",name:"Barely anything"},{id:"med",name:"Normal amount"},{id:"big",name:"Loads"}];
+function amtName(id){var a=AMT.filter(function(x){return x.id===id;})[0];return a?a.name:"";}
+function pooType(id){return POO.concat(QUICK).filter(function(q){return q.id===id;})[0]||POO[1];}
+var POO = [
+  {id:"hard",   name:"Hard",   c:"#8A5A2B", hint:"Lumpy or hard to pass"},
+  {id:"normal", name:"Normal", c:"#5E9474", hint:"Smooth and easy"},
+  {id:"loose",  name:"Loose",  c:"#D29A2A", hint:"Soft or runny"}
+];
+var TABS = [["home","🏠","Home"],["skin","✨","Skin"],["gym","💪","Gym"],["period","🩸","Period"],["poo","🌿","Gut"],["insights","💡","Insights"]];
+
+function pad(n){return n<10?"0"+n:""+n}
+function key(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function fromKey(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+function diff(a,b){return Math.round((fromKey(b)-fromKey(a))/864e5)}
+function fmt(d,o){return d.toLocaleDateString("en-GB",o||{weekday:"long",day:"numeric",month:"long"})}
+function short(d){return fmt(d,d.getFullYear()!==new Date().getFullYear()?{weekday:"short",day:"numeric",month:"short",year:"numeric"}:{weekday:"short",day:"numeric",month:"short"})}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var today=new Date();today.setHours(0,0,0,0);var TODAY=key(today);
+
+function seed(){return {v:1,mode:"ageing",done:0,log:{},history:[],seeded:TODAY,lacticSeeded:true};}
+function migrate(s){
+  if(!s) s=seed();
+  if(s.v===1){s.v=2;}
+  s.gym=s.gym||{}; s.gymPlan=s.gymPlan||{}; s.gutq=s.gutq||{}; s.periods=s.periods||[]; s.poo=s.poo||{}; s.log=s.log||{}; s.history=s.history||[];
+  if(!s.courseStart) s.courseStart = key(addDays(today,-(s.done||0)+1));
+  if(false){ var tu=new Date(today); while(tu.getDay()!==3) tu=addDays(tu,-1); var tk=key(tu); s.log[tk]=Object.assign({},s.log[tk]||{},{lactic:true}); s.lacticSeeded=true; }
+  return s;
+}
+var state=null;
+try{var raw=localStorage.getItem(LS_KEY);if(raw)state=JSON.parse(raw);}catch(e){}
+state=migrate(state);
+
+var ui={tab:"home", sel:TODAY, weekOff:0, cal:{gym:null,period:null,poo:null}};
+(function(){var m=new Date(today.getFullYear(),today.getMonth(),1);ui.cal.gym=new Date(m);ui.cal.period=new Date(m);ui.cal.poo=new Date(m);})();
+var docRef=null, saveTimer=null;
+
+function toast(msg){var el=document.getElementById("toast");if(!el){el=document.createElement("div");el.id="toast";el.setAttribute("role","status");document.body.appendChild(el);}el.textContent=msg;el.className="show";clearTimeout(toast.t);toast.t=setTimeout(function(){el.className="";},2200);}
+function setSync(t){document.getElementById("sync").textContent=t;}
+function save(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}
+  if(!docRef)return;
+  clearTimeout(saveTimer);setSync("Saving…");
+  saveTimer=setTimeout(function(){
+    docRef.set(JSON.parse(JSON.stringify(state))).then(function(){setSync("Saved");}).catch(function(){setSync("Saved on this device");});
+  },500);
+}
+
+/* ---------- Skin helpers ---------- */
+function entry(k){return state.log[k]||{};}
+function setEntry(k,patch){
+  var e=Object.assign({},entry(k),patch);
+  Object.keys(e).forEach(function(p){if(e[p]===false||e[p]===null||e[p]===0)delete e[p];});
+  if(Object.keys(e).length)state.log[k]=e;else delete state.log[k];
+}
+function isTopup(d){return state.mode==="blemish"&&d.getDay()===TOPUP_DAY;}
+function ledModeFor(d){return isTopup(d)?"ageing":state.mode;}
+function remaining(){return Math.max(0,COURSE_LEN-state.done);}
+function tonightDone(){var e=entry(TODAY);return !!e.led;}
+function finishDate(){
+  var n=remaining(); if(!n)return null;
+  var d=addDays(today, tonightDone()?1:0);
+  for(var guard=0;guard<400;guard++){
+    if(!(state.mode==="blemish"&&d.getDay()===TOPUP_DAY)){n--; if(n===0)return d;}
+    d=addDays(d,1);
+  }
+  return d;
+}
+function missedThisCourse(){
+  var n=0;Object.keys(state.log).forEach(function(k){if(k>=state.courseStart&&state.log[k].missed)n++;});return n;
+}
+
+/* ---------- Period helpers ---------- */
+function periodsSorted(){return state.periods.slice().sort(function(a,b){return a.s<b.s?-1:1;});}
+function ongoing(){var p=periodsSorted();var last=p[p.length-1];return last&&!last.e?last:null;}
+function isPeriodDay(k){
+  return state.periods.some(function(p){var end=p.e||(k<=TODAY?TODAY:p.s);return k>=p.s&&k<=end;});
+}
+function cycleInfo(){
+  var p=periodsSorted(), lens=[], plens=[];
+  for(var i=1;i<p.length;i++)lens.push(diff(p[i-1].s,p[i].s));
+  p.forEach(function(x){if(x.e)plens.push(diff(x.s,x.e)+1);});
+  var recent=lens.slice(-6);
+  var avg=recent.length?Math.round(recent.reduce(function(a,b){return a+b},0)/recent.length):null;
+  var mn=recent.length?Math.min.apply(null,recent):null, mx=recent.length?Math.max.apply(null,recent):null;
+  var pavg=plens.length?Math.round(plens.slice(-6).reduce(function(a,b){return a+b},0)/Math.min(6,plens.length)):null;
+  var last=p[p.length-1], win=null;
+  if(last&&recent.length){
+    var lo=mn,hi=mx; if(lo===hi){lo-=2;hi+=2;}
+    win={from:addDays(fromKey(last.s),lo),to:addDays(fromKey(last.s),hi)};
+  }
+  return {lens:lens,avg:avg,min:mn,max:mx,pavg:pavg,last:last,win:win,count:p.length};
+}
+function inPredict(k){
+  var c=cycleInfo(); if(!c.win||ongoing())return false;
+  return k>=key(c.win.from)&&k<=key(c.win.to)&&k>=TODAY;
+}
+
+/* ---------- Common render bits ---------- */
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=TABS.map(function(t){
+    return '<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(ui.tab===t[0])+'"><span aria-hidden="true">'+t[1]+'</span>'+t[2]+'</button>';
+  }).join("");
+  TABS.forEach(function(t){document.getElementById("v-"+t[0]).classList.toggle("on",ui.tab===t[0]);});
+  var titles={home:"Today",skin:"Skin",gym:"Gym",period:"Period",poo:"Gut health",insights:"Insights"};
+  document.getElementById("pageTitle").textContent=titles[ui.tab];
+}
+function dateBar(){
+  var d=fromKey(ui.sel);
+  var lbl=ui.sel===TODAY?"Today":(ui.sel===key(addDays(today,-1))?"Yesterday":(ui.sel===key(addDays(today,1))?"Tomorrow":short(d)));
+  var fwd=ui.tab==="gym"&&ui.sel<key(addDays(today,90));
+  return '<div class="datebar"><button class="arrow" data-nav="-1" aria-label="Previous day">‹</button><div class="lbl">'+lbl+'</div><button class="arrow" data-nav="1" aria-label="Next day"'+((ui.sel>=TODAY&&!fwd)?' disabled style="opacity:.35"':'')+'>›</button></div>';
+}
+function calendar(which, cellFn, legend, allowFuture){
+  var m=ui.cal[which], y=m.getFullYear(), mo=m.getMonth();
+  var first=new Date(y,mo,1), offset=(first.getDay()+6)%7, days=new Date(y,mo+1,0).getDate();
+  var h='<div class="cal-head"><button class="arrow" data-cal="'+which+'" data-dir="-1" aria-label="Previous month">‹</button><h3 style="font-size:18px">'+fmt(first,{month:"long",year:"numeric"})+'</h3><button class="arrow" data-cal="'+which+'" data-dir="1" aria-label="Next month">›</button></div><div class="cal">';
+  ["M","T","W","T","F","S","S"].forEach(function(w){h+='<div class="wd">'+w+'</div>';});
+  for(var i=0;i<offset;i++)h+='<div class="cell blank"></div>';
+  for(var dd=1;dd<=days;dd++){
+    var k=key(new Date(y,mo,dd)), r=cellFn(k)||{};
+    var cls="cell"+(k===TODAY?" today":"")+(allowFuture&&k>TODAY?" future":"")+(k===ui.sel?" sel":"")+(r.cls?" "+r.cls:"");
+    var dots=r.dots&&r.dots.length?'<span class="dots">'+r.dots.map(function(c){var ring=c.charAt(0)==="o";return '<i'+(ring?' class="ring"':'')+' style="--c:'+(ring?c.slice(1):c)+'"></i>';}).join("")+'</span>':"";
+    h+='<button class="'+cls+'" data-pick="'+k+'"'+((k>TODAY&&!allowFuture)?' disabled':'')+' aria-label="'+fmt(fromKey(k))+'"><span>'+dd+'</span>'+dots+(r.extra||"")+'</button>';
+  }
+  h+='</div>';
+  if(legend)h+='<div class="legend"><span style="font-weight:700">Colour key:</span>'+legend.map(function(l){return '<span><i style="--c:'+l[1]+'"></i>'+l[0]+'</span>';}).join("")+'</div>';
+  return h;
+}
+
+/* ---------- Home ---------- */
+function greeting(){var h=new Date().getHours();return h<12?"Good morning":h<18?"Good afternoon":"Good evening";}
+function renderHome(){
+  var t=nightType(today), e=entry(TODAY), info=NIGHT_INFO[t], m=MODES[ledModeFor(today)];
+  var parts=[e.am,e.pm,e.led]; if(info.active) parts.push(e.active); if(today.getDay()===EYE_DAY) parts.push(e.eye);
+  var doneN=parts.filter(Boolean).length, totalN=parts.length, C=2*Math.PI*30, off=C*(1-doneN/totalN);
+  var tonightTxt=info.title+(today.getDay()===EYE_DAY?" + eye mask":"");
+  var maskTxt=isTopup(today)?"Anti-ageing top-up tonight":(state.mode==="sustain"?"Maintenance mode":m.name+" · day "+Math.min(COURSE_LEN,state.done+(e.led?0:1))+" of "+COURSE_LEN);
+  var gToday=state.gym[TODAY], gymLogged=!!(gToday&&(gToday.rest||(gToday.w&&gToday.w.length)));
+  var todo=[
+    {p:"am",label:"Morning skincare",on:e.am},
+    {p:"pm",label:"Evening skincare",on:e.pm},
+    {p:"led",label:"LED mask",on:e.led}
+  ];
+  if(t==="L") todo.push({p:"lactic",label:"Lactic acid",on:e.lactic});
+  if(today.getDay()===EYE_DAY) todo.push({p:"eye",label:"Under-eye mask",on:e.eye});
+  var tdone=todo.filter(function(x){return x.on;}).length;
+  // Alerts: period
+  var alerts="", onP=ongoing(), ci=cycleInfo();
+  if(onP){
+    alerts+='<div class="alert al-plum"><span class="al-ic">🩸</span><div><b>Period ongoing</b><div class="small">Day '+(diff(onP.s,TODAY)+1)+', started '+short(fromKey(onP.s))+'</div></div><button class="btn small" data-per="end">Ended today</button></div>';
+  } else if(ci.win){
+    var wf=key(ci.win.from), wt=key(ci.win.to), wk7=key(addDays(today,7));
+    if(wt<TODAY) alerts+='<div class="alert al-plum"><span class="al-ic">🩸</span><div><b>Period later than usual</b><div class="small">Your usual window ended '+short(ci.win.to)+'</div></div><button class="btn small" data-per="start">Started today</button></div>';
+    else if(wf<=wk7) alerts+='<div class="alert al-plum"><span class="al-ic">🩸</span><div><b>'+(wf<=TODAY?"Period could start any day":"Period could start this week")+'</b><div class="small">Expected '+short(ci.win.from)+' to '+short(ci.win.to)+'</div></div><button class="btn small" data-per="start">Started today</button></div>';
+  }
+  // Quick gut check, twice a day
+  var slot=new Date().getHours()<15?"am":"pm", gq=(state.gutq||{})[TODAY]||{};
+  var gutRow=gq[slot]?"":'<div class="gutbox"><span class="gut-l">'+(slot==="am"?"Morning":"Evening")+' gut check <button class="gt-link" data-tab="poo" style="margin-left:6px">Open ›</button></span><span class="gut-e">'+QUICK.map(function(q){return '<button class="gbtn" style="--gc:'+q.c+'" data-quick="'+q.id+'" aria-label="'+q.name+'">'+q.emoji+'</button>';}).join("")+'<button class="gbtn" style="--gc:#9C8FA0" data-quick="skip" aria-label="Not yet">🙅‍♀️</button></span></div>';
+  // Gym: today + tomorrow, compact
+  var gp=state.gymPlan[TODAY], tmK=key(addDays(today,1)), tp=state.gymPlan[tmK];
+  function tags(o){return o.rest?'<span class="up-tag" style="--c:'+REST_C+'">Rest day</span>':o.w.map(function(id){return '<span class="up-tag" style="--c:'+gymColor(id)+'">'+gymName(id)+'</span>';}).join("");}
+  var r1,r2;
+  if(gymLogged) r1='<span class="up-w">'+tags(gToday)+'</span><span class="gt-state done">Done</span>';
+  else if(hasGym(gp)) r1='<span class="up-w">'+tags(gp)+'</span><button class="pb-btn sm" data-gymdone="today">Did it</button>';
+  else r1='<span class="up-w muted small">Nothing planned</span><button class="gt-link" data-todo="gym">Log</button>';
+  r2=hasGym(tp)?'<span class="up-w">'+tags(tp)+'</span><button class="gt-link" data-gotoplan="'+tmK+'">Edit</button>':'<span class="up-w muted small">Nothing planned</span><button class="gt-link" data-gotoplan="'+tmK+'">Plan</button>';
+  var gymH='<div class="card gt-card"><div class="todo-head"><h2 style="margin:0;font-size:18px">💪 Gym</h2><button class="gt-link" data-tab="gym">Open Gym ›</button></div>'
+    +'<div class="gt-row"><b class="gt-d">Today</b>'+r1+'</div><div class="gt-row"><b class="gt-d">Tomorrow</b>'+r2+'</div></div>';
+  // Skin ticks
+  var qt='<div class="card"><div class="todo-head"><h2 style="margin:0;font-size:18px">✨ Skin <span class="small muted" style="font-family:inherit">'+tdone+' of '+todo.length+'</span></h2><button class="gt-link" data-tab="skin">Open Skin ›</button></div><div class="qt-row">'
+    +todo.map(function(x){return '<button class="qt'+(x.on?" on":"")+'" data-todo="'+x.p+'" aria-pressed="'+!!x.on+'"><span class="tb-box"></span>'+x.label+'</button>';}).join("")
+    +'</div>'+gutRow+'</div>';
+  var hero=alerts+qt+gymH;
+  // Gym
+  var g=state.gym[TODAY], gymBig, wk=0, gviz="";
+  var mon=addDays(today,-((today.getDay()+6)%7)), DL=["M","T","W","T","F","S","S"];
+  for(var j=0;j<7;j++){var dk=key(addDays(mon,j)),gg=state.gym[dk],bg="";
+    if(gg&&gg.w&&gg.w.length){wk++;var n=gg.w.length;bg="linear-gradient(to right,"+gg.w.map(function(id,ix){return gymColor(id)+" "+(ix*100/n)+"% "+((ix+1)*100/n)+"%";}).join(",")+")";}
+    else if(gg&&gg.rest)bg=REST_C;
+    gviz+='<span class="vd'+(dk===TODAY?" vt":"")+'"><i'+(bg?' class="on" style="background:'+bg+'"':'')+'></i><b>'+DL[j]+'</b></span>';}
+  if(g&&g.rest)gymBig="Rest day";else if(g&&g.w&&g.w.length)gymBig=g.w.map(gymName).join(" + ");else if(hasGym(state.gymPlan[TODAY]))gymBig="Planned: "+gymList(state.gymPlan[TODAY]);else gymBig="Not logged yet";
+
+  // Period
+  var on=ongoing(),c=cycleInfo(),perBig,perSub;
+  if(on){perBig="Day "+(diff(on.s,TODAY)+1);perSub="of your period";}
+  else if(c.win){var a=diff(TODAY,key(c.win.from)),b=diff(TODAY,key(c.win.to));
+    if(a>0){perBig=a+" to "+b+" days";perSub="until your next one";}else if(b>=0){perBig="Any day now";perSub="You\u2019re in your usual window";}else{perBig="Running late";perSub="Later than your usual range";}}
+  else if(c.last){perBig="Logged";perSub="Add one more to see predictions";}
+  else{perBig="Start logging";perSub="Tap when your period starts";}
+  var pviz="";
+  if(c.last&&!on&&c.avg){var since=diff(c.last.s,TODAY),frac=Math.min(1,since/c.avg);for(var q=0;q<7;q++)pviz+='<i'+(q<Math.round(frac*7)?' class="on"':'')+'></i>';}
+  else for(var q2=0;q2<7;q2++)pviz+='<i'+(on&&q2<Math.min(7,diff(on.s,TODAY)+1)?' class="on"':'')+'></i>';
+
+  // Gut
+  var pt=state.poo[TODAY]||[], lastK=null, uviz="";
+  Object.keys(state.poo).sort().forEach(function(k){if(state.poo[k].length&&k<=TODAY)lastK=k;});
+  var mon2=addDays(today,-((today.getDay()+6)%7));
+  for(var u=0;u<7;u++){var uk=key(addDays(mon2,u)),ul=state.poo[uk]||[];uviz+='<span class="vd'+(uk===TODAY?" vt":"")+'"><i'+(ul.length?' class="on" style="background:'+pooType(ul[ul.length-1].type).c+'"':'')+'></i><b>'+["M","T","W","T","F","S","S"][u]+'</b></span>';}
+  var gutBig=pt.length?pt.length+" today":"Nothing yet";
+  var gutSub=pt.length?"Last at "+(pt[pt.length-1].t||"today"):(lastK?"Last one "+(diff(lastK,TODAY)===1?"yesterday":diff(lastK,TODAY)+" days ago"):"Tap to log");
+
+  document.getElementById("v-home").innerHTML=hero+'<div class="tiles">'
+    +tile("skin","var(--red)","var(--redsoft)","✨","Skin",info.short+" night",doneN+" of "+totalN+" ticked today",(function(){var v="";for(var z=0;z<totalN;z++)v+='<i'+(z<doneN?' class="on"':'')+'></i>';return v;})())
+    +tile("gym","var(--blue)","var(--bluesoft)","💪","Gym",gymBig,wk+(wk===1?" workout":" workouts")+" this week",gviz)
+    +tile("period","var(--plum)","var(--plumsoft)","🩸","Period",perBig,perSub,pviz)
+    +tile("poo","var(--sage)","var(--sagesoft)","🌿","Gut health",gutBig,gutSub,uviz)
+    +'</div>';
+}
+function tile(tab,acc,soft,ic,label,big,sub,viz){
+  return '<button class="tile" data-tab="'+tab+'" style="--acc:'+acc+';--soft:'+soft+'"><span class="ic" aria-hidden="true">'+ic+'</span><span class="tl">'+label+'</span><span class="tb">'+esc(big)+'</span><span class="ts">'+esc(sub)+'</span><span class="viz" aria-hidden="true">'+viz+'</span></button>';
+}
+function gymName(id){var f=GYM.filter(function(x){return x.id===id;})[0];return f?f.name:id;}
+function gymColor(id){var f=GYM.filter(function(x){return x.id===id;})[0];return f?f.c:REST_C;}
+
+/* ---------- Skin ---------- */
+var MORNING=[["Toner","Hydration, preps skin"],["Vitamin C serum","Brightens and protects"],["Hydrating essence","Extra hydration, barrier support"],["Moisturiser","Seals everything in"],["Facial massage","Helps products absorb and depuffs"],["SPF","Essential, actives raise sun sensitivity"]];
+function eveningSteps(d){
+  var t=nightType(d), m=MODES[ledModeFor(d)], s=[];
+  s.push(["Cleanser","Removes the day without stripping"]);
+  s.push(["LED mask: "+m.name+", "+m.mins+" min",isTopup(d)?"Weekly top-up to keep ageing results going":"Clean dry skin, before actives",true]);
+  if(d.getDay()===EYE_DAY)s.push(["Eye treatment, 15 min","Weekly eye treatment. No LEDs, so it can run any time this evening",true]);
+  s.push(["Toner","Preps skin, calms after LED"]);
+  if(t==="A")s.push(["Salicylic acid","Clears congestion and under-skin bumps",true]);
+  if(t==="B")s.push(["Retinol","Cell turnover, smoother texture",true]);
+  if(t==="L")s.push(["Lactic acid","Gentle exfoliant, brightens and smooths",true]);
+  if(t==="C")s.push(["Hydrating essence","Extra hydration, barrier support"]);
+  if(t==="A"||t==="C")s.push(["Eye cream","Fine on salicylic and plain nights"]);
+  s.push(["Moisturiser","Finishes and locks in hydration"]);
+  return s;
+}
+function stepList(a){return '<ol class="steps">'+a.map(function(s){return '<li class="'+(s[2]?"hl":"")+'"><div><div class="step-name">'+s[0]+'</div><div class="step-why">'+s[1]+'</div></div></li>';}).join("")+'</ol>';}
+function checkBtn(prop,label,on,extra){return '<button class="check'+(extra?" "+extra:"")+(on?" on":"")+'" data-check="'+prop+'" aria-pressed="'+!!on+'"><span class="box"></span>'+label+'</button>';}
+
+function renderSkin(){
+  var m=MODES[state.mode], left=remaining(), beads="";
+  if(state.mode!=="sustain")for(var i=0;i<COURSE_LEN;i++)beads+='<span class="bead'+(i<Math.min(state.done,COURSE_LEN)?" on":"")+'"></span>';
+  var missed=missedThisCourse(), note="", fd=finishDate();
+  if(state.mode==="ageing") note=left?'<div class="note note-red">'+left+' more to go. Finishes around <b>'+short(fd)+'</b>, then Clear skin.</div>':'<div class="note note-amber"><b>Course complete.</b> Time to switch to Clear skin. Anti-ageing drops to a Saturday top-up.</div>';
+  else if(state.mode==="blemish") note=left?'<div class="note note-blue">'+left+' Clear skin sessions to go (around <b>'+short(fd)+'</b>). Saturdays are a Anti-ageing top-up.</div>':'<div class="note note-amber"><b>Course complete.</b> Switch to Maintenance to keep both going.</div>';
+  else note='<div class="note note-sage">Maintenance mode. Maintenance mixes red and blue light so it keeps up both results. Aim for most days.</div>';
+  if(missed&&state.mode!=="sustain") note+='<div class="note note-plum">Missed '+missed+(missed===1?" night":" nights")+' this course. No stress, missed nights just push the finish date back.</div>';
+  var nextBtn=(!left&&state.mode==="ageing")?'<button class="btn solid" data-act="switch" data-to="blemish">Start Clear skin</button>':(!left&&state.mode==="blemish")?'<button class="btn solid" data-act="switch" data-to="sustain">Start Maintenance</button>':"";
+  var sustainCount=0;for(var j=0;j<7;j++)if(entry(key(addDays(today,-j))).led==="sustain")sustainCount++;
+  var countBlock=state.mode==="sustain"?'<div class="count"><b>'+sustainCount+'</b><span class="muted">sessions in the last 7 days</span></div>'
+    :'<div class="count"><b>'+state.done+'</b><span class="muted">of '+COURSE_LEN+' days</span></div><div class="beads" style="--beadc:'+m.c+';--beadglow:'+m.glow+'">'+beads+'</div><div class="week-labels"><span>Week 1</span><span>Week 3</span><span>Week 5</span><span>Week 7</span></div>';
+  var mask='<div class="card"><div class="mask-top"><div><h2 style="margin-bottom:6px">LED mask course</h2><span class="mode-pill '+m.cls+'">'+m.name+' · '+m.mins+' min</span></div><select id="modeSel" aria-label="Current course">'
+    +["ageing","blemish","sustain"].map(function(k){return '<option value="'+k+'"'+(k===(ui.pendingMode||state.mode)?" selected":"")+'>'+MODES[k].name+'</option>';}).join("")+'</select></div>'
+    +(ui.pendingMode?'<div class="note note-amber">Switch to <b>'+MODES[ui.pendingMode].name+'</b>? This starts a new count.<div class="row" style="margin-top:8px"><button class="btn solid small" data-act="switch" data-to="'+ui.pendingMode+'">Switch</button><button class="btn small" data-act="cancelmode">Cancel</button></div></div>':'')+countBlock+note+'<div class="row" style="margin-top:14px">'+nextBtn+(state.mode!=="sustain"?'<span class="small muted">Count off?</span><button class="btn small" data-act="minus">−1</button><button class="btn small" data-act="plus">+1</button>':'')+'</div></div>';
+
+  // week strip containing sel
+  var selD=fromKey(ui.sel), start=addDays(selD,-((selD.getDay()+6)%7)), strip="";
+  for(var k2=0;k2<7;k2++){
+    var d=addDays(start,k2),k=key(d),t=nightType(d),e=entry(k);
+    var ticks=[e.am,e.pm].map(function(x){return '<i class="'+(x?"on":"")+'"></i>';}).join("")+'<i class="'+(e.led?"on":e.missed?"miss":"")+'"></i>'+(t==="L"?'<i class="'+(e.lactic?"on":"")+'"></i>':"");
+    strip+='<button class="day'+(k===ui.sel?" sel":"")+(k===TODAY?" is-today":"")+'" data-pick="'+k+'"><span class="dn">'+(k===TODAY?"Today":fmt(d,{weekday:"short"}))+'</span><span class="dd">'+d.getDate()+'</span><span class="tag t-'+t+'">'+NIGHT_INFO[t].short+'</span><span class="ticks">'+ticks+'</span></button>';
+  }
+  var stripNav='<div class="strip-nav"><button class="btn small" data-week="-7">‹ Last week</button><span class="small muted">'+short(start)+' to '+short(addDays(start,6))+'</span><button class="btn small" data-week="7"'+(key(addDays(start,7))>TODAY?' disabled style="opacity:.35"':'')+'>Next ›</button></div>';
+
+  var d0=selD,t0=nightType(d0),info=NIGHT_INFO[t0],e0=entry(ui.sel),future=ui.sel>TODAY;
+  var due=lacticDue(), moved=(ui.sel===TODAY&&t0==="L"&&!e0.lactic&&today.getDay()!==LACTIC_DAY);
+  var checks="";
+  if(!future){
+    checks='<div class="checks">'+checkBtn("am","Morning skincare",e0.am)+checkBtn("pm","Evening skincare",e0.pm)
+      +checkBtn("led","LED mask",e0.led)
+      +(t0==="L"?checkBtn("lactic","Lactic acid",e0.lactic):"")
+      +(d0.getDay()===EYE_DAY?checkBtn("eye","Under-eye mask",e0.eye):"")+'</div>'
+      +'<div class="row" style="justify-content:space-between;margin-top:10px"><span class="small muted">Tick things as you do them. Nothing has to be all ticked.</span>'
+      +'<button class="btn small'+(e0.missed?" danger":"")+'" data-check="missed">'+(e0.missed?"LED mask skipped ✕ (tap to undo)":"Skipped the LED mask?")+'</button></div>';
+  }
+  var plan='<div class="card"><div class="plan-head"><h2 style="margin:0">'+(ui.sel===TODAY?"Today":fmt(d0))+'</h2><span class="tag t-'+t0+'" style="padding:4px 10px;font-size:13px">'+info.title+'</span></div>'
+    +'<p class="muted small">'+info.why+(d0.getDay()===EYE_DAY?". Under-eye mask night too.":".")+'</p>'
+    +(moved?'<div class="note note-red">Lactic acid moved to tonight because Wednesday was missed.</div>':'')
+    +checks+'<p class="small muted" style="margin-top:12px">Next lactic acid night: <b>'+(due===TODAY?"tonight":short(fromKey(due)))+'</b></p></div>';
+  var items=[];
+  if(state.mode==="ageing"){items.push(["var(--red)","Now: Anti-ageing daily",state.done+" of "+COURSE_LEN+" done"]);items.push(["var(--blue)","Next: Clear skin daily for 8 weeks",fd?"From around "+fmt(addDays(fd,1),{day:"numeric",month:"long"}):"Ready now"]);items.push(["var(--red)","Saturdays during Clear skin: Anti-ageing","Keeps the ageing results topped up"]);items.push(["var(--sage)","After that: Maintenance","Maintenance for both, most days"]);}
+  else if(state.mode==="blemish"){items.push(["var(--blue)","Now: Clear skin",state.done+" of "+COURSE_LEN+" done"]);items.push(["var(--red)","Saturdays: Anti-ageing top-up","Doesn\u2019t count towards the Clear skin total"]);items.push(["var(--sage)","Next: Maintenance",fd?"From around "+fmt(addDays(fd,1),{day:"numeric",month:"long"}):"Ready now"]);}
+  else {items.push(["var(--sage)","Now: Maintenance","Most days, 5 min"]);items.push(["var(--muted)","Any time: another 8 week course","Pick it from the menu above"]);}
+  items.push(["var(--amber)","Every Saturday: Eye treatment, 15 min","Weekly eye treatment, no LEDs"]);
+  var tl='<ul class="timeline" style="margin-top:12px">'+items.map(function(i){return '<li style="--dot:'+i[0]+'"><div><div class="step-name">'+i[1]+'</div><div class="when">'+i[2]+'</div></div></li>';}).join("")+'</ul>';
+  var ref='<p class="small" style="margin-top:10px">Lactic acid is every Wednesday with plain nights either side. If you miss it, it moves to the next night and then goes back to Wednesdays. Retinol Fri and Sun, salicylic Mon and Sat.</p>'
+    +'<p class="small" style="margin-top:8px">Eye cream goes on salicylic and plain nights only. LED timings: Anti-ageing 10 min, Clear skin 10 min, Maintenance 5 min and Eye treatment 15 min.</p>'
+    +'';
+  var acc='<div class="card acc">'
+    +'<details><summary><span>☀️ Morning routine</span><span class="sm">'+MORNING.length+' steps</span></summary>'+stepList(MORNING)+'</details>'
+    +'<details><summary><span>🌙 Evening routine</span><span class="sm">'+info.title+'</span></summary>'+stepList(eveningSteps(d0))+'</details>'
+    +'<details><summary><span>✨ Mask plan</span><span class="sm">'+MODES[state.mode].name+'</span></summary>'+tl+'</details>'
+    +'<details><summary><span>📅 How the week works</span></summary>'+ref+'</details></div>';
+  document.getElementById("v-skin").innerHTML=plan+stripNav+'<nav class="strip">'+strip+'</nav>'+mask+acc;
+}
+
+/* ---------- Gym ---------- */
+function gymList(o){return o?(o.rest?"Rest day":(o.w||[]).map(gymName).join(" + ")):"";}
+function hasGym(o){return !!(o&&(o.rest||(o.w&&o.w.length)));}
+function renderGym(){
+  var future=ui.sel>TODAY, store=future?state.gymPlan:state.gym;
+  var g=store[ui.sel]||{}, w=g.w||[], plan=state.gymPlan[ui.sel];
+  var chips=GYM.map(function(x){return '<button class="chip" style="--c:'+x.c+'" data-gym="'+x.id+'" aria-pressed="'+(w.indexOf(x.id)>=0)+'">'+x.name+'</button>';}).join("");
+  var rest='<button class="chip" style="--c:'+REST_C+'" data-gymrest="1" aria-pressed="'+!!g.rest+'">Rest day</button>';
+  var note=future?'<p class="plan-note">Planning ahead. Tap what you want to do this day.</p>':'';
+  var pbar='';
+  if(!future&&hasGym(plan)&&!hasGym(state.gym[ui.sel])) pbar='<div class="plan-bar"><span class="pb-t">You planned <b>'+esc(gymList(plan))+'</b></span><button class="pb-btn" data-gymdone="1">Did it</button></div>';
+  var log='<div class="card sticky-log">'+dateBar()+note+'<div class="chips" style="margin-bottom:0">'+chips+rest+'</div>'+pbar+'</div>';
+
+  // Coming up
+  var ups=Object.keys(state.gymPlan).filter(function(k){return k>TODAY&&hasGym(state.gymPlan[k]);}).sort().slice(0,10);
+  var tp=state.gymPlan[TODAY]; if(hasGym(tp)&&!hasGym(state.gym[TODAY])) ups.unshift(TODAY);
+  var upH='<div class="card"><div class="plan-head"><h2 style="margin:0">Coming up</h2><button class="pb-btn" data-gymplan="1">Plan a day</button></div>';
+  if(!ups.length) upH+='<p class="empty" style="margin:6px 0 0">Nothing planned yet. Tap a future date on the calendar or use the › arrow at the top to plan ahead.</p>';
+  else upH+='<ul class="up-list">'+ups.map(function(k){var o=state.gymPlan[k],d=fromKey(k),dl=k===TODAY?"Today":(k===key(addDays(today,1))?"Tmrw":fmt(d,{weekday:"short"}));
+    var tags=o.rest?'<span class="up-tag" style="--c:'+REST_C+'">Rest day</span>':o.w.map(function(id){return '<span class="up-tag" style="--c:'+gymColor(id)+'">'+gymName(id)+'</span>';}).join("");
+    return '<li><button class="up-row" data-pick="'+k+'"><span class="up-day"><b>'+dl+'</b><span>'+fmt(d,{day:"numeric",month:"short"})+'</span></span><span class="up-w">'+tags+'</span></button></li>';}).join("")+'</ul>';
+  upH+='</div>';
+
+  var ws=addDays(today,-((today.getDay()+6)%7)), doneWk={}, planWk={}, restWk=0;
+  for(var i=0;i<7;i++){var dk=key(addDays(ws,i));
+    if(dk<=TODAY){var gg=state.gym[dk];if(gg&&gg.w)gg.w.forEach(function(id){doneWk[id]=dk;});if(gg&&gg.rest)restWk++;}
+    var pp=state.gymPlan[dk];if(dk>=TODAY&&pp&&pp.w&&!(dk===TODAY&&hasGym(state.gym[dk])))pp.w.forEach(function(id){if(!planWk[id])planWk[id]=dk;});}
+  var nDone=GYM.filter(function(x){return doneWk[x.id];}).length;
+  var stats='<div class="card"><div class="plan-head"><h2 style="margin:0">This week</h2><span class="small muted">'+(nDone?nDone+(nDone===1?' workout':' workouts'):'Nothing yet')+(restWk?' · '+restWk+(restWk===1?' rest day':' rest days'):'')+'</span></div>'
+    +'<ul class="wk-list">'+GYM.map(function(x){var d=doneWk[x.id],p=planWk[x.id];var t=d?fmt(fromKey(d),{weekday:"long"}):(p?"Planned "+(p===TODAY?"today":fmt(fromKey(p),{weekday:"long"})):"");return '<li class="'+(d?"on":"")+'" style="--c:'+x.c+'"><span class="wk-dot"></span><span class="wk-n">'+x.name+'</span><span class="small muted">'+t+'</span></li>';}).join("")+'</ul></div>';
+  var cal='<div class="card">'+calendar("gym",function(k){var gg=state.gym[k];
+      if(hasGym(gg)){if(gg.rest)return{dots:[REST_C]};return{dots:gg.w.map(gymColor)};}
+      var pp=state.gymPlan[k];if(hasGym(pp)&&k>=TODAY){if(pp.rest)return{dots:["o"+REST_C]};return{dots:pp.w.map(function(id){return "o"+gymColor(id);})};}
+      return null;},GYM.map(function(x){return[x.name,x.c];}).concat([["Rest",REST_C]]),true)
+    +'<p class="small muted" style="margin:8px 0 0">Filled dots are done, hollow dots are planned.</p></div>';
+  document.getElementById("v-gym").innerHTML=log+upH+cal+stats;
+}
+
+/* ---------- Period ---------- */
+function renderPeriod(){
+  var on=ongoing(), c=cycleInfo(), top;
+  if(on){
+    top='<div class="card"><h2>Day '+(diff(on.s,TODAY)+1)+' of your period</h2><p class="muted small" style="margin-bottom:14px">Started '+fmt(fromKey(on.s))+'</p><div class="big-btns"><button class="bigb" style="--c:var(--plum)" data-per="end">It ended today</button><button class="bigb" style="--c:var(--muted)" data-per="endy">It ended yesterday</button></div></div>';
+  } else {
+    var status="";
+    if(c.win){var a=diff(TODAY,key(c.win.from)),b=diff(TODAY,key(c.win.to));
+      status=a>0?'Next one expected in <b>'+a+' to '+b+' days</b> ('+short(c.win.from)+' to '+short(c.win.to)+').':(b>=0?'You\u2019re in your usual window, it could start any day.':'You\u2019re later than your usual range. Irregular cycles can do this.');}
+    else status=c.last?'Log one more period and predictions will appear.':'Tap below when your period starts.';
+    top='<div class="card"><h2>'+(c.last?"Between periods":"Period tracker")+'</h2><p class="small" style="margin-bottom:14px">'+status+'</p><div class="big-btns"><button class="bigb" style="--c:var(--red)" data-per="start">It started today</button><button class="bigb" style="--c:var(--plum)" data-per="starty">It started yesterday</button></div><div class="section-label">Started earlier and still going?</div><div class="row"><input type="date" id="pStartOn" max="'+TODAY+'" aria-label="Start date"><button class="btn solid small" data-per="starton">Log start</button></div><p class="small muted" style="margin-top:6px">No end date needed. Tap \u201cIt ended\u201d when it finishes.</p></div>';
+  }
+  var stats='<div class="card"><h2>Your cycle</h2><div class="stats"><div class="stat"><b>'+(c.avg||"–")+'</b><span>average cycle (days)</span></div><div class="stat"><b>'+(c.min!==null?(c.min===c.max?c.min:c.min+"–"+c.max):"–")+'</b><span>shortest to longest</span></div><div class="stat"><b>'+(c.pavg||"–")+'</b><span>average period (days)</span></div></div>'
+    +'<p class="small muted" style="margin-top:12px">Predictions use your last 6 cycles and show a range rather than one day, since yours vary. The more you log, the better it gets.</p></div>';
+  var cal='<div class="card">'+calendar("period",function(k){if(isPeriodDay(k))return{cls:"period"};if(inPredict(k))return{cls:"predict"};return null;},[["Period","var(--red)"],["Expected window","var(--redsoft)"]])+'</div>';
+  var p=periodsSorted().reverse();
+  var hist='<div class="card"><h2>History</h2>'+(p.length?'<ul class="list">'+p.map(function(x){var idx=state.periods.indexOf(x);var len=x.e?(diff(x.s,x.e)+1)+" days":"ongoing";return '<li><div class="row"><input type="date" value="'+x.s+'" max="'+TODAY+'" data-pedit="'+idx+'" data-f="s" aria-label="Start"><span class="muted small">to</span><input type="date" value="'+(x.e||"")+'" max="'+TODAY+'" data-pedit="'+idx+'" data-f="e" aria-label="End"></div><div class="row"><span class="small muted">'+len+'</span><button class="btn small danger" data-pdel="'+idx+'">'+(ui.pendingDel===String(idx)?"Tap again to delete":"Delete")+'</button></div></li>';}).join("")+'</ul>':'<p class="empty">No periods logged yet.</p>')
+    +'<div class="section-label">Add a past period</div><p class="small muted" style="margin-bottom:8px">Leave the end date blank if it\u2019s still going.</p><div class="row"><input type="date" id="pAddS" max="'+TODAY+'" aria-label="Start date"><span class="muted small">to</span><input type="date" id="pAddE" max="'+TODAY+'" aria-label="End date"><button class="btn solid small" data-per="add">Add</button></div>'
+    +'<p class="small muted" style="margin-top:14px">If cycles are regularly shorter than 21 days or longer than 35, or you go 3 months without one, it\u2019s worth mentioning to your GP.</p></div>';
+  document.getElementById("v-period").innerHTML=top+stats+cal+hist;
+}
+
+/* ---------- Poo ---------- */
+function renderPoo(){
+  var list=state.poo[ui.sel]||[];
+  var dr=ui.gutDraft||{};
+  var btns='<div class="gsel"><div class="small muted" style="font-weight:600">Consistency</div><div class="gopts">'+POO.map(function(p){return '<button class="gopt" style="--c:'+p.c+'" data-gc="'+p.id+'" aria-pressed="'+(dr.type===p.id)+'"><b>'+p.name+'</b><span>'+p.hint+'</span></button>';}).join("")+'</div>'
+    +'<div class="small muted" style="font-weight:600;margin-top:12px">How much</div><div class="gopts">'+AMT.map(function(a){return '<button class="gopt" style="--c:var(--ink)" data-ga="'+a.id+'" aria-pressed="'+(dr.amt===a.id)+'"><b>'+a.name+'</b></button>';}).join("")+'</div>'
+    +'<button class="btn solid" style="margin-top:14px;width:100%" data-gutlog="1"'+(dr.type&&dr.amt?'':' disabled style="margin-top:14px;width:100%;opacity:.4"')+'>Log it</button></div>';
+  var items=list.length?'<ul class="list" style="margin-top:14px">'+list.map(function(x,i){var p=pooType(x.type);return '<li><span class="row">'+(p.emoji?'<span>'+p.emoji+'</span>':'')+'<span style="width:12px;height:12px;border-radius:50%;background:'+p.c+';display:inline-block"></span><b>'+p.name+'</b>'+(x.amt?'<span class="small">'+amtName(x.amt)+'</span>':'')+'<span class="muted small">'+(x.t||"")+'</span></span><button class="btn small danger" data-poodel="'+i+'">Remove</button></li>';}).join("")+'</ul>':'<p class="empty" style="margin-top:14px">Nothing logged'+(ui.sel===TODAY?" yet today":" this day")+'.</p>';
+  var qrow='<div class="gutrow" style="border:0;padding-top:14px"><span class="small muted">Or a quick one</span><span class="gut-e">'+QUICK.map(function(q){return '<button class="gbtn" style="--gc:'+q.c+'" data-poo="'+q.id+'" aria-label="'+q.name+'">'+q.emoji+'</button>';}).join("")+'</span></div>';
+  var log='<div class="card">'+dateBar()+''+btns+qrow+items+'</div>';
+
+  var total=0,days=0,types={};
+  for(var i=0;i<7;i++){var l=state.poo[key(addDays(today,-i))]||[];total+=l.length;if(l.length)days++;l.forEach(function(x){types[x.type]=(types[x.type]||0)+1;});}
+  var lastK=null;Object.keys(state.poo).sort().forEach(function(k){if(state.poo[k].length&&k<=TODAY)lastK=k;});
+  var since=lastK===null?"–":diff(lastK,TODAY);
+  var stats='<div class="card"><h2>Last 7 days</h2><div class="stats"><div class="stat"><b>'+total+'</b><span>total</span></div><div class="stat"><b>'+days+' of 7</b><span>days with one</span></div><div class="stat"><b>'+since+'</b><span>days since last</span></div></div>'
+    +(total?'<div class="legend" style="margin-top:12px">'+POO.concat(QUICK).filter(function(p){return types[p.id];}).map(function(p){return '<span><i style="--c:'+p.c+'"></i>'+p.name+': '+(types[p.id]||0)+'</span>';}).join("")+'</div>':'')+'</div>';
+  var cal='<div class="card">'+calendar("poo",function(k){var l=state.poo[k]||[];if(!l.length)return null;return{dots:l.slice(0,4).map(function(x){var p=pooType(x.type);return p.c;})};},POO.map(function(p){return[p.name,p.c];}).concat(QUICK.map(function(q){return[q.emoji+' '+q.name,q.c];})))+'</div>';
+  document.getElementById("v-poo").innerHTML=log+stats+cal;
+}
+
+
+/* ---------- Insights ---------- */
+function gutEntries(days){var out=[];for(var i=0;i<days;i++){var k=key(addDays(today,-i));(state.poo[k]||[]).forEach(function(x){out.push({k:k,type:x.type,amt:x.amt});});}return out;}
+function renderInsights(){
+  var cards=[]; // {area,lvl:'watch'|'tip'|'good',title,body,tips}
+  // ---- Gut ----
+  var g7=gutEntries(7), g14=gutEntries(14);
+  var detail7=g7.filter(function(x){return ["hard","normal","loose"].indexOf(x.type)>=0;});
+  var hard7=detail7.filter(function(x){return x.type==="hard";}).length;
+  var loose7=detail7.filter(function(x){return x.type==="loose";}).length;
+  var small7=detail7.filter(function(x){return x.amt==="small";}).length;
+  var bad7=g7.filter(function(x){return x.type==="bad";}).length;
+  var gap=0,maxGap=0,started=false;for(var i=13;i>=0;i--){var l=state.poo[key(addDays(today,-i))]||[];var real=l.filter(function(x){return x.type!=="skip";}).length;if(real){gap=0;started=true;}else if(started){gap++;maxGap=Math.max(maxGap,gap);}}
+  var anyGut=Object.keys(state.poo).length>0;
+  if(hard7>=3||(detail7.length>=3&&hard7/detail7.length>=0.4)||(anyGut&&maxGap>=3)){
+    cards.push({area:"gut",lvl:"watch",title:"Things have been on the hard side",body:(hard7?hard7+" hard "+(hard7===1?"one":"ones")+" in the last 7 days":"")+(hard7&&maxGap>=3?" and ":"")+(maxGap>=3?"a "+maxGap+" day gap with nothing logged":"")+".",
+      tips:["Add fibre: oats, beans, lentils, veg and wholegrain bread","Two kiwis a day or a handful of prunes are well known for helping","Drink more water, especially with extra fibre and on gym days","A walk after meals can get things moving"]});
+  }
+  if(small7>=3){
+    cards.push({area:"gut",lvl:"tip",title:"Lots of \u201cbarely anything\u201d",body:small7+" small ones this week, which usually means not enough bulk going through.",
+      tips:["More fibre and water tend to help bulk things up","Chia or ground flaxseed in yoghurt or oats is an easy add","Try not to rush it or hold it in when you need to go"]});
+  }
+  if(loose7>=3){
+    cards.push({area:"gut",lvl:"watch",title:"Things have been loose",body:loose7+" loose ones in the last 7 days.",
+      tips:["Keep fluids up, loose days take water out of you","Plainer foods like rice, bananas and toast can settle things","Notice triggers: coffee, alcohol, spicy or greasy food and sugar-free sweets are common ones"]});
+  }
+  if(bad7>=3) cards.push({area:"gut",lvl:"tip",title:"A few \ud83d\ude16 days lately",body:bad7+" bad check-ins this week. Using the detailed log in the Gut tab on those days will help spot what\u2019s going on.",tips:[]});
+  // period link
+  var perLoose=0,perDays=0,offLoose=0,offDays=0;
+  for(var d=0;d<60;d++){var kk=key(addDays(today,-d)),le=(state.poo[kk]||[]).filter(function(x){return x.type==="loose";}).length;if(isPeriodDay(kk)){perDays++;perLoose+=le;}else{offDays++;offLoose+=le;}}
+  if(perDays>=4&&perLoose>=2&&perLoose/perDays>offLoose/Math.max(1,offDays)*1.5){
+    cards.push({area:"gut",lvl:"tip",title:"Your gut changes around your period",body:"You log more loose ones on period days. That\u2019s really common, the same hormones that cause cramps can speed up your gut.",tips:["Go easier on coffee during your period","Keep plainer snacks around for those days"]});
+  }
+  if(!cards.filter(function(c){return c.area==="gut";}).length){
+    if(detail7.length>=3) cards.push({area:"gut",lvl:"good",title:"Gut\u2019s been happy",body:"Mostly normal this week. Whatever you\u2019re eating is working.",tips:[]});
+    else cards.push({area:"gut",lvl:"empty",title:"Not enough to go on yet",body:"Log a few more with consistency and amount and tips will appear here.",tips:[]});
+  }
+  // ---- Skin ----
+  var led7=0,skip7=0,pm7=0;for(var j=0;j<7;j++){var e=entry(key(addDays(today,-j)));if(e.led)led7++;if(e.missed)skip7++;if(e.pm)pm7++;}
+  if(state.mode!=="sustain"){
+    if(skip7>=2) cards.push({area:"skin",lvl:"watch",title:"The mask has slipped a bit",body:skip7+" skipped nights this week. The course now finishes around "+(finishDate()?short(finishDate()):"soon")+".",tips:["Pairing it with something you already do (TV, scrolling in bed) makes it easier to stick to","You can use it straight after cleansing, before the rest of the routine"]});
+    else if(led7>=5) cards.push({area:"skin",lvl:"good",title:"Mask is on track",body:led7+" sessions in the last 7 days. "+remaining()+" to go.",tips:[]});
+  }
+  if(pm7>0&&pm7<=3) cards.push({area:"skin",lvl:"tip",title:"Evenings have been hit and miss",body:"Evening skincare ticked "+pm7+(pm7===1?" time":" times")+" this week. Retinol and acids work best with regular use.",tips:["On a tired night a plain night routine (cleanse, toner, moisturiser) still counts","Never double up actives to catch up"]});
+  var lacDue=lacticDue();if(lacDue===TODAY&&today.getDay()!==LACTIC_DAY) cards.push({area:"skin",lvl:"tip",title:"Lactic acid is waiting",body:"Wednesday\u2019s lactic was missed so it\u2019s on tonight.",tips:[]});
+  // ---- Gym ----
+  var ws=addDays(today,-((today.getDay()+6)%7)),doneW={},restW=0,lastGym=null;
+  for(var w=0;w<7;w++){var dk=key(addDays(ws,w));if(dk>TODAY)break;var gg=state.gym[dk];if(gg&&gg.w)gg.w.forEach(function(id){doneW[id]=1;});if(gg&&gg.rest)restW++;}
+  Object.keys(state.gym).sort().forEach(function(k){var gg=state.gym[k];if(k<=TODAY&&gg.w&&gg.w.length)lastGym=k;});
+  var left=GYM.filter(function(x){return !doneW[x.id]&&x.id!=="extra";}), daysLeft=7-((today.getDay()+6)%7);
+  if(Object.keys(state.gym).length){
+    if(left.length&&left.length>daysLeft) cards.push({area:"gym",lvl:"tip",title:"More to fit in than days left",body:left.length+" workouts still to do with "+daysLeft+(daysLeft===1?" day":" days")+" left this week: "+left.map(function(x){return x.name.toLowerCase();}).join(", ")+".",tips:["Pair two on one day, like core and yoga","Or let one roll to next week, it\u2019s not a test"]});
+    else if(left.length) cards.push({area:"gym",lvl:"tip",title:"Still to do this week",body:left.map(function(x){return x.name;}).join(", ")+".",tips:[]});
+    else cards.push({area:"gym",lvl:"good",title:"Full week done",body:"All your main workouts are ticked off this week.",tips:[]});
+    var r7=0,w7=0;for(var z=0;z<7;z++){var g2=state.gym[key(addDays(today,-z))];if(g2&&g2.rest)r7++;if(g2&&g2.w&&g2.w.length)w7++;}
+    if(w7>=6&&r7===0) cards.push({area:"gym",lvl:"watch",title:"No rest days lately",body:"You\u2019ve trained "+w7+" of the last 7 days. Muscles grow on rest days, not in the gym.",tips:["Take at least one full rest day this week"]});
+    if(lastGym&&diff(lastGym,TODAY)>=5) cards.push({area:"gym",lvl:"tip",title:"It\u2019s been a few days",body:"Last workout was "+diff(lastGym,TODAY)+" days ago. Even a short cardio session counts.",tips:[]});
+    if(hard7>=2){var hardRest=0;for(var h=0;h<7;h++){var hk=key(addDays(today,-h));var hg=state.gym[hk];if((state.poo[hk]||[]).some(function(x){return x.type==="hard";})&&!(hg&&hg.w&&hg.w.length))hardRest++;}
+      if(hardRest>=2) cards.push({area:"gym",lvl:"tip",title:"Hard days tend to be less active days",body:"Most of your hard ones this week were on days without a workout. Movement helps your gut too.",tips:["A 20 minute walk on rest days can help"]});}
+  } else cards.push({area:"gym",lvl:"empty",title:"No workouts logged yet",body:"Log a few in the Gym tab and tips will show here.",tips:[]});
+  // ---- Period ----
+  var ci=cycleInfo(), onP=ongoing();
+  if(onP&&diff(onP.s,TODAY)+1>7) cards.push({area:"period",lvl:"watch",title:"This one\u2019s running long",body:"Day "+(diff(onP.s,TODAY)+1)+". If it hasn\u2019t actually stopped, it\u2019s worth mentioning to your GP if periods often go past 7 days. If it has, tap \u201cIt ended\u201d in the Period tab.",tips:[]});
+  if(ci.lens.length>=2){
+    if(ci.max-ci.min>7) cards.push({area:"period",lvl:"tip",title:"Your cycle varies quite a bit",body:"Between "+ci.min+" and "+ci.max+" days recently, so predictions are shown as a range. Logging every period makes the range tighter.",tips:["Stress, sleep, training load and big changes in food can all shift a cycle"]});
+    if(ci.recentShort=ci.lens.slice(-3).filter(function(x){return x<21||x>35;}).length>=2) cards.push({area:"period",lvl:"watch",title:"Worth a chat with your GP",body:"A few recent cycles have been under 21 or over 35 days. Not an emergency, just worth mentioning.",tips:[]});
+    else cards.push({area:"period",lvl:"good",title:"Average cycle: "+ci.avg+" days",body:"Based on your last "+Math.min(6,ci.lens.length)+" cycles.",tips:[]});
+  } else cards.push({area:"period",lvl:"empty",title:"Needs a few more periods",body:"Once you\u2019ve logged 3 periods you\u2019ll see how your cycle behaves here.",tips:[]});
+
+  var AREA={gut:["🌿 Gut","var(--sage)","var(--sagesoft)"],skin:["✨ Skin","var(--red)","var(--redsoft)"],gym:["💪 Gym","var(--blue)","var(--bluesoft)"],period:["🩸 Period","var(--plum)","var(--plumsoft)"]};
+  var LV={watch:"Keep an eye on",tip:"Tip",good:"Going well",empty:"Waiting for data"};
+  var order={watch:0,tip:1,good:2,empty:3};
+  cards.sort(function(a,b){return order[a.lvl]-order[b.lvl];});
+  var html='<p class="small muted" style="margin:-6px 0 14px">Based on what you\u2019ve logged. General tips, not medical advice.</p>';
+  html+=cards.map(function(c){var ar=AREA[c.area];return '<div class="ins lv-'+c.lvl+'" style="--acc:'+ar[1]+';--soft:'+ar[2]+'"><div class="ins-top"><span class="ins-area">'+ar[0]+'</span><span class="ins-lv">'+LV[c.lvl]+'</span></div><h3>'+c.title+'</h3><p class="small" style="margin-top:4px">'+c.body+'</p>'+(c.tips.length?'<ul class="ins-tips">'+c.tips.map(function(t){return '<li>'+t+'</li>';}).join("")+'</ul>':'')+'</div>';}).join("");
+  html+='<p class="small muted" style="margin-top:8px">See a GP if you notice blood in your poo, big changes that last more than 3 weeks, or pain that doesn\u2019t settle.</p>';
+  document.getElementById("v-insights").innerHTML=html;
+}
+
+function renderAll(){
+  document.getElementById("todayLine").textContent=fmt(today);
+  renderTabs();
+  ({home:renderHome,skin:renderSkin,gym:renderGym,period:renderPeriod,poo:renderPoo,insights:renderInsights})[ui.tab]();
+}
+
+/* ---------- Actions ---------- */
+function switchMode(to){state.history.push({mode:state.mode,done:state.done,ended:TODAY});state.mode=to;state.done=0;state.courseStart=key(addDays(today,tonightDone()?1:0));save();renderAll();}
+function nowTime(){var n=new Date();return pad(n.getHours())+":"+pad(n.getMinutes());}
+
+document.addEventListener("click",function(ev){
+  var b=ev.target.closest("button");if(!b||b.disabled)return;
+  var ds=b.dataset;
+  if(ds.pdel===undefined&&ui.pendingDel!=null){ui.pendingDel=null;}
+  if(ds.tab){ui.tab=ds.tab;ui.sel=TODAY;renderAll();window.scrollTo(0,0);return;}
+  if(ds.pick){ui.sel=ds.pick;var fromUp=b.classList.contains("up-row");renderAll();if(fromUp)window.scrollTo(0,0);return;}
+  if(ds.nav){var nd=key(addDays(fromKey(ui.sel),+ds.nav));if(nd<=TODAY||ui.tab==="gym"){ui.sel=nd;renderAll();}return;}
+  if(ds.week){var nk=key(addDays(fromKey(ui.sel),+ds.week));ui.sel=nk>TODAY?TODAY:nk;renderAll();return;}
+  if(ds.cal){var m=ui.cal[ds.cal];ui.cal[ds.cal]=new Date(m.getFullYear(),m.getMonth()+(+ds.dir),1);renderAll();return;}
+
+  if(ds.quick){
+    var slot2=new Date().getHours()<15?"am":"pm";
+    state.gutq=state.gutq||{}; var gq2=Object.assign({},state.gutq[TODAY]||{}); gq2[slot2]=ds.quick; state.gutq[TODAY]=gq2;
+    if(ds.quick!=="skip"){var ql=(state.poo[TODAY]||[]).slice();ql.push({type:ds.quick,t:nowTime()});state.poo[TODAY]=ql;toast("Logged "+pooType(ds.quick).emoji);}
+    save();renderAll();return;
+  }
+  if(ds.todo){
+    if(ds.todo==="gym"){ui.tab="gym";ui.sel=TODAY;renderAll();window.scrollTo(0,0);return;}
+    ui.sel=TODAY; ds={check:ds.todo};
+  }
+  if(ds.check){
+    var k=ui.sel,e=entry(k),d=fromKey(k),mode=ledModeFor(d),counts=(mode===state.mode&&!isTopup(d)&&k>=state.courseStart);
+    if(ds.check==="led"){
+      if(e.led){setEntry(k,{led:null});if(counts)state.done=Math.max(0,state.done-1);}
+      else{setEntry(k,{led:mode,missed:null});if(counts)state.done=Math.min(COURSE_LEN,state.done+1);}
+    } else if(ds.check==="missed"){
+      if(e.missed)setEntry(k,{missed:null});
+      else{if(e.led&&counts)state.done=Math.max(0,state.done-1);setEntry(k,{missed:true,led:null});}
+    } else {var o={};o[ds.check]=!e[ds.check];setEntry(k,o);}
+    save();renderAll();return;
+  }
+  if(ds.water){var n=+ds.water,cur=entry(ui.sel).water||0;setEntry(ui.sel,{water:cur===n?n-1:n});save();renderAll();return;}
+  if(ds.act==="plus"){state.done=Math.min(COURSE_LEN,state.done+1);save();renderAll();return;}
+  if(ds.act==="minus"){state.done=Math.max(0,state.done-1);save();renderAll();return;}
+  if(ds.act==="switch"){ui.pendingMode=null;switchMode(ds.to);return;}
+  if(ds.act==="cancelmode"){ui.pendingMode=null;renderAll();return;}
+
+  if(ds.gym){
+    var st=ui.sel>TODAY?state.gymPlan:state.gym;
+    var g=Object.assign({},st[ui.sel]||{}),w=(g.w||[]).slice(),ix=w.indexOf(ds.gym);
+    if(ix>=0)w.splice(ix,1);else w.push(ds.gym);
+    delete g.rest;g.w=w;if(!w.length)delete st[ui.sel];else st[ui.sel]=g;
+    save();renderAll();return;
+  }
+  if(ds.gymrest){var st2=ui.sel>TODAY?state.gymPlan:state.gym;var gr=st2[ui.sel];if(gr&&gr.rest)delete st2[ui.sel];else st2[ui.sel]={rest:true};save();renderAll();return;}
+  if(ds.gotoplan){ui.tab="gym";ui.sel=ds.gotoplan;var gd=fromKey(ds.gotoplan);ui.cal.gym=new Date(gd.getFullYear(),gd.getMonth(),1);renderAll();window.scrollTo(0,0);return;}
+  if(ds.gymdone){var gk=ds.gymdone==="today"?TODAY:ui.sel;var pl=state.gymPlan[gk];if(pl){state.gym[gk]=JSON.parse(JSON.stringify(pl));save();toast("Logged");renderAll();}return;}
+  if(ds.gymplan){ui.tab="gym";var nk2=key(addDays(today,1));while(hasGym(state.gymPlan[nk2]))nk2=key(addDays(fromKey(nk2),1));ui.sel=nk2;var nd2=fromKey(nk2);ui.cal.gym=new Date(nd2.getFullYear(),nd2.getMonth(),1);renderAll();window.scrollTo(0,0);return;}
+
+  if(ds.per){
+    var y=key(addDays(today,-1)),on=ongoing();
+    if(ds.per==="start"||ds.per==="starty"){state.periods.push({s:ds.per==="start"?TODAY:y});}
+    else if((ds.per==="end"||ds.per==="endy")&&on){var ek=ds.per==="end"?TODAY:y;on.e=ek<on.s?on.s:ek;}
+    else if(ds.per==="starton"){
+      var so=document.getElementById("pStartOn").value;
+      if(!so){toast("Pick the day it started");return;}
+      state.periods.push({s:so});toast("Logged, it\u2019ll show as ongoing");
+    }
+    else if(ds.per==="add"){
+      var s=document.getElementById("pAddS").value,en=document.getElementById("pAddE").value;
+      if(!s){toast("Pick a start date first");return;}
+      if(en&&en<s){toast("The end date is before the start date");return;}
+      state.periods.push(en?{s:s,e:en}:{s:s});
+    }
+    save();renderAll();return;
+  }
+  if(ds.pdel!==undefined){
+    if(ui.pendingDel===ds.pdel){ui.pendingDel=null;state.periods.splice(+ds.pdel,1);save();renderAll();toast("Period deleted");}
+    else{ui.pendingDel=ds.pdel;renderAll();}
+    return;}
+
+  if(ds.gc){ui.gutDraft=Object.assign({},ui.gutDraft||{},{type:ds.gc});renderAll();return;}
+  if(ds.ga){ui.gutDraft=Object.assign({},ui.gutDraft||{},{amt:ds.ga});renderAll();return;}
+  if(ds.gutlog){var dr2=ui.gutDraft||{};if(!dr2.type||!dr2.amt)return;var lg=(state.poo[ui.sel]||[]).slice();lg.push({type:dr2.type,amt:dr2.amt,t:ui.sel===TODAY?nowTime():null});state.poo[ui.sel]=lg;ui.gutDraft=null;save();renderAll();toast("Logged");return;}
+  if(ds.poo){var l=(state.poo[ui.sel]||[]).slice();l.push({type:ds.poo,t:ui.sel===TODAY?nowTime():null});state.poo[ui.sel]=l;save();renderAll();return;}
+  if(ds.poodel!==undefined){var l2=(state.poo[ui.sel]||[]).slice();l2.splice(+ds.poodel,1);if(l2.length)state.poo[ui.sel]=l2;else delete state.poo[ui.sel];save();renderAll();return;}
+});
+document.addEventListener("change",function(ev){
+  var t=ev.target;
+  if(t.id==="modeSel"){var to=t.value;ui.pendingMode=(to===state.mode)?null:to;renderAll();return;}
+  if(t.dataset&&t.dataset.pedit!==undefined){
+    var p=state.periods[+t.dataset.pedit];if(!p)return;
+    if(t.dataset.f==="s"){if(!t.value){renderAll();return;}p.s=t.value;if(p.e&&p.e<p.s)p.e=p.s;}
+    else{if(t.value&&t.value<p.s){toast("The end date is before the start date");renderAll();return;}if(t.value)p.e=t.value;else delete p.e;}
+    save();renderAll();
+  }
+});
+
+function setTabsH(){var t=document.querySelector(".tabs");if(t)document.documentElement.style.setProperty("--tabsH",t.offsetHeight+"px");}
+window.addEventListener("resize",setTabsH);
+renderAll();setTabsH();
+
+(async function(){
+  try{
+    if(!window.claude||!window.claude.use)return;
+    var r=await Promise.all([window.claude.use("db"),window.claude.use("user")]);
+    var db=r[0],user=r[1];if(!db||!user)return;
+    var uid=await user.id();if(!uid)return;
+    docRef=db.doc("data/users/"+uid+"/"+DOC_ID);
+    var snap=await docRef.get();
+    if(snap.exists){
+      var remote=snap.data();
+      if(remote&&(remote.v===1||remote.v===2)){state=migrate(JSON.parse(JSON.stringify(remote)));try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}
+        if(remote.v!==2)docRef.set(JSON.parse(JSON.stringify(state))).catch(function(){});
+        renderAll();}
+    } else await docRef.set(JSON.parse(JSON.stringify(state)));
+    setSync("Saved");
+  }catch(e){docRef=null;setSync("Saved on this device");}
+})();
+})();
+</script>
+</body>
+</html>

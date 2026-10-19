@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Positive Log">
+<meta name="theme-color" content="#e8935a">
+<title>Positive Log</title>
+<style>
+  :root {
+    --bg: #f6f2ea;
+    --bg-soft: #ffffff;
+    --ink: #332c26;
+    --ink-soft: #7a6f63;
+    --border: #ecdfd0;
+    --card-shadow: 0 2px 10px rgba(80,60,30,0.06);
+    --accent1: #f0a04b;
+    --accent2: #ef7d63;
+    --chip-soft: #fbeee0;
+    --chip-ink: #a35a2e;
+    --caring-soft: #e3f1ee;
+    --caring-ink: #2e7d6b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #201c18; --bg-soft: #2b2620; --ink: #f0e9df; --ink-soft: #b3a89a; --border: #3d362e;
+      --card-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      --chip-soft: #3a2c1e; --chip-ink: #f0b380;
+      --caring-soft: #1f322d; --caring-ink: #7fd6c0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #201c18; --bg-soft: #2b2620; --ink: #f0e9df; --ink-soft: #b3a89a; --border: #3d362e;
+    --card-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    --chip-soft: #3a2c1e; --chip-ink: #f0b380;
+    --caring-soft: #1f322d; --caring-ink: #7fd6c0;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(50px + env(safe-area-inset-top, 0px));
+    -webkit-font-smoothing: antialiased;
+  }
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+    background: var(--bg);
+    padding: 10px 20px;
+    padding-top: calc(10px + env(safe-area-inset-top, 0px));
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+  }
+  .topbar h1 { margin: 0; font-size: 1.15rem; font-weight: 700; }
+
+  main { max-width: 600px; margin: 0 auto; padding: 18px 16px 40px; }
+
+  .card {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+
+  .composer .field-label { font-size: 0.8rem; font-weight: 600; color: var(--ink-soft); margin: 12px 0 5px; }
+  .composer .field-label:first-child { margin-top: 0; }
+  .composer input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 0.95rem;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: inherit;
+  }
+  .composer select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 0.95rem;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%), linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);
+    background-position: calc(100% - 20px) calc(1.1em), calc(100% - 15px) calc(1.1em);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+  }
+  .composer input:focus, .composer select:focus { outline: 2px solid var(--accent1); outline-offset: 1px; }
+  .save-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    cursor: pointer;
+  }
+
+  .stats { display: flex; gap: 10px; }
+  .stat { flex: 1; text-align: center; }
+  .stat .num { font-size: 1.4rem; font-weight: 700; color: var(--chip-ink); }
+  .stat .lbl { font-size: 0.72rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
+  .garden-title { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); margin-bottom: 10px; }
+  .garden-bed { display: flex; flex-wrap: wrap; gap: 6px; font-size: 1.5rem; line-height: 1; }
+  .garden-empty { font-size: 0.85rem; color: var(--ink-soft); font-style: italic; }
+
+  .recap-row { display: flex; gap: 10px; }
+  .recap-btn {
+    flex: 1;
+    text-align: center;
+    padding: 13px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--chip-ink);
+    background: var(--chip-soft);
+  }
+  .recap-btn.month { color: var(--caring-ink); background: var(--caring-soft); }
+
+  .log-title { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); margin: 4px 0 12px; }
+  .entry {
+    position: relative;
+    padding: 12px 34px 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .entry:last-child { border-bottom: none; }
+  .entry-event { font-size: 0.94rem; font-weight: 600; margin-bottom: 3px; }
+  .entry-emotion { font-size: 0.85rem; color: var(--chip-ink); font-weight: 600; margin-bottom: 3px; }
+  .entry-date { font-size: 0.76rem; color: var(--ink-soft); }
+  .del {
+    position: absolute; top: 12px; right: 0;
+    background: none; border: none; color: var(--ink-soft);
+    font-size: 1rem; cursor: pointer; padding: 4px;
+  }
+  .empty { font-size: 0.88rem; color: var(--ink-soft); font-style: italic; padding: 6px 0; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--bg);
+    padding: 10px 20px; border-radius: 999px;
+    font-size: 0.88rem; font-weight: 600;
+    opacity: 0; pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 50;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    z-index: 60;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: var(--bg-soft);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+    max-width: 600px; width: 100%;
+    max-height: 82vh; overflow-y: auto;
+  }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .modal h2 { font-size: 1.15rem; margin: 0; }
+  .modal-close { background: none; border: none; color: var(--ink-soft); font-size: 1.3rem; cursor: pointer; }
+  .modal-sub { color: var(--ink-soft); font-size: 0.82rem; margin-bottom: 14px; }
+  .tally { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .tally-chip { font-size: 0.76rem; padding: 5px 10px; border-radius: 999px; background: var(--chip-soft); color: var(--chip-ink); font-weight: 600; }
+
+  .month-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 4px; border-bottom: 1px solid var(--border);
+    cursor: pointer; font-size: 0.92rem;
+  }
+  .month-row:last-child { border-bottom: none; }
+  .month-row .month-count { color: var(--ink-soft); font-size: 0.8rem; }
+  .modal-back {
+    background: none; border: none; color: var(--chip-ink);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 0 0 8px; display: none;
+  }
+
+  .offline-note {
+    font-size: 0.8rem; color: var(--ink-soft); text-align: center; padding: 10px 16px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"><h1>🌸 Positive Log</h1></div>
+
+<main>
+
+  <div class="card composer">
+    <div class="field-label">Event</div>
+    <input type="text" id="eventInput" placeholder="e.g. A friend thanked me for listening">
+    <div class="field-label">Emotion</div>
+    <select id="emotionSelect">
+      <option value="Proud">Proud</option>
+      <option value="Loved">Loved</option>
+      <option value="Grateful">Grateful</option>
+      <option value="Happy">Happy</option>
+      <option value="Calm">Calm</option>
+      <option value="Confident">Confident</option>
+      <option value="Relieved">Relieved</option>
+      <option value="Excited">Excited</option>
+      <option value="Hopeful">Hopeful</option>
+      <option value="Content">Content</option>
+      <option value="Caring">Caring</option>
+      <option value="Trustful">Trustful</option>
+      <option value="In control">In control</option>
+      <option value="Inspired">Inspired</option>
+      <option value="Peaceful">Peaceful</option>
+      <option value="other">Other (type your own)</option>
+    </select>
+    <input type="text" id="emotionOtherInput" placeholder="Type your own..." style="display:none; margin-top:8px;">
+    <button class="save-btn" id="saveBtn">Log it</button>
+  </div>
+
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><div class="num" id="levelNum">1</div><div class="lbl">Level</div></div>
+      <div class="stat"><div class="num" id="totalNum">0</div><div class="lbl">Total logged</div></div>
+      <div class="stat"><div class="num" id="monthNum">0</div><div class="lbl">Last 30 days</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="recap-row">
+      <div class="recap-btn" id="recap14">🌤️ Fortnightly recap</div>
+      <div class="recap-btn month" id="recap30">🌙 Monthly recap</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="garden-title">Your garden</div>
+    <div class="garden-bed" id="gardenBed"><span class="garden-empty">Every entry plants a bloom here.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="log-title">Recent entries</div>
+    <div id="log"></div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitle">Recap</h2>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <button class="modal-back" id="modalBack">← Back to months</button>
+    <div class="modal-sub" id="modalSub"></div>
+    <div class="tally" id="modalTally"></div>
+    <div id="modalList"></div>
+  </div>
+</div>
+
+<script>
+/* Standalone storage: when this page runs outside claude.ai, everything is saved
+   in this browser's localStorage. Nothing is sent anywhere. */
+(function(){
+  if (window.claude && window.claude.use) return;
+  var KEY = 'app-data:' + location.pathname;
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { store = {}; }
+  var listeners = [];
+  function persist(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+  function clone(v){ return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
+  function norm(p){ return String(p).replace(/^\/+|\/+$/g, ''); }
+  function notify(){ setTimeout(function(){ listeners.slice().forEach(function(l){ try { l(); } catch (e) {} }); }, 0); }
+  function docSnap(path){
+    var has = Object.prototype.hasOwnProperty.call(store, path);
+    var id = path.split('/').pop();
+    return { id: id, exists: has, metadata: { hasPendingWrites: false },
+      data: function(){ return has ? clone(store[path]) : undefined; }, ref: docRef(path) };
+  }
+  function docRef(p){
+    var path = norm(p);
+    return {
+      id: path.split('/').pop(), path: path,
+      get: function(){ return Promise.resolve(docSnap(path)); },
+      set: function(d){ store[path] = clone(d) || {}; persist(); notify(); return Promise.resolve(); },
+      update: function(patch){ store[path] = Object.assign({}, store[path] || {}, clone(patch)); persist(); notify(); return Promise.resolve(); },
+      delete: function(){ delete store[path]; persist(); notify(); return Promise.resolve(); },
+      onSnapshot: function(cb){
+        var last = null;
+        var fire = function(){ var s = JSON.stringify(store[path]); if (s === last) return; last = s; cb(docSnap(path)); };
+        listeners.push(fire); setTimeout(fire, 0);
+        return function(){ listeners = listeners.filter(function(x){ return x !== fire; }); };
+      }
+    };
+  }
+  function colSnap(path){
+    var pre = path + '/';
+    var docs = Object.keys(store).filter(function(k){ return k.indexOf(pre) === 0 && k.slice(pre.length).indexOf('/') < 0; })
+      .sort().map(function(k){ return docSnap(k); });
+    return { docs: docs, size: docs.length, empty: !docs.length, forEach: function(f){ docs.forEach(f); } };
+  }
+  function colRef(p){
+    var path = norm(p);
+    return {
+      path: path,
+      doc: function(id){ return docRef(path + '/' + (id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)))); },
+      get: function(){ return Promise.resolve(colSnap(path)); },
+      onSnapshot: function(cb){
+        var last = null;
+        var fire = function(){ var s = colSnap(path); var sig = JSON.stringify(s.docs.map(function(d){ return [d.id, store[path + '/' + d.id]]; })); if (sig === last) return; last = sig; cb(s); };
+        listeners.push(fire); setTimeout(fire, 0);
+        return function(){ listeners = listeners.filter(function(x){ return x !== fire; }); };
+      }
+    };
+  }
+  var db = { doc: docRef, collection: colRef };
+  var user = { id: function(){ return Promise.resolve('local'); } };
+  var downloads = { save: function(o){
+    var blob = o.data instanceof Blob ? o.data : new Blob([o.data], { type: o.mimeType || 'application/octet-stream' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = o.filename || 'download';
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return Promise.resolve();
+  } };
+  window.claude = { use: function(name){
+    if (name === 'db') return Promise.resolve(db);
+    if (name === 'user') return Promise.resolve(user);
+    if (name === 'downloads') return Promise.resolve(downloads);
+    return Promise.resolve(null);
+  } };
+})();
+</script>
+<script>
+  const BLOOMS = ['🌸','🌼','🌷','🌻','🌺','💐'];
+  let entries = [];
+  let dbRef = null;
+
+  const SEED = [];
+
+  function dayKey(d){ return d.toISOString().slice(0,10); }
+  function daysAgo(n){ const d = new Date(); d.setDate(d.getDate() - n); return d; }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2200);
+  }
+
+  function render(){
+    const total = entries.length;
+    const level = Math.floor(total/5) + 1;
+    const monthCount = entries.filter(e => new Date(e.createdAt) >= daysAgo(30)).length;
+
+    document.getElementById('levelNum').textContent = level;
+    document.getElementById('totalNum').textContent = total;
+    document.getElementById('monthNum').textContent = monthCount;
+
+    const bed = document.getElementById('gardenBed');
+    if(total === 0){
+      bed.innerHTML = '<span class="garden-empty">Every entry plants a bloom here.</span>';
+    } else {
+      bed.innerHTML = entries.map((e,i) => `<span>${BLOOMS[i % BLOOMS.length]}</span>`).join('');
+    }
+
+    const logEl = document.getElementById('log');
+    if(total === 0){
+      logEl.innerHTML = '<div class="empty">Nothing logged yet - write down the next kind thing someone says, or the next thing you\'re proud of.</div>';
+      return;
+    }
+    logEl.innerHTML = '';
+    [...entries].reverse().forEach(e=>{
+      const div = document.createElement('div');
+      div.className = 'entry';
+      const d = new Date(e.createdAt);
+      const dateStr = d.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+      div.innerHTML = `
+        <button class="del" data-id="${e.id}">✕</button>
+        <div class="entry-event"></div>
+        <div class="entry-emotion"></div>
+        <div class="entry-date">${dateStr}</div>
+      `;
+      div.querySelector('.entry-event').textContent = e.event;
+      div.querySelector('.entry-emotion').textContent = e.emotion;
+      logEl.appendChild(div);
+    });
+    logEl.querySelectorAll('.del').forEach(btn=>{
+      btn.addEventListener('click', ()=>deleteEntry(btn.dataset.id));
+    });
+  }
+
+  async function persist(){
+    if(!dbRef) return true;
+    try { await dbRef.set({ items: entries }); return true; }
+    catch(err) { showToast('Could not save - try again'); return false; }
+  }
+
+  async function addEntry(){
+    const eventInput = document.getElementById('eventInput');
+    const emotionSelect = document.getElementById('emotionSelect');
+    const emotionOtherInput = document.getElementById('emotionOtherInput');
+    const event = eventInput.value.trim();
+    let emotion = emotionSelect.value;
+    if(emotion === 'other'){
+      emotion = emotionOtherInput.value.trim() || '—';
+    }
+    if(!event) { eventInput.focus(); return; }
+
+    const prevLevel = Math.floor(entries.length/5) + 1;
+    entries = [...entries, { id: 'e' + Date.now(), event, emotion, createdAt: new Date().toISOString() }];
+    const newLevel = Math.floor(entries.length/5) + 1;
+
+    eventInput.value = '';
+    emotionSelect.value = 'Proud';
+    emotionOtherInput.value = '';
+    emotionOtherInput.style.display = 'none';
+    render();
+    const saved = await persist();
+    if(!saved) return;
+
+    if(newLevel > prevLevel) showToast(`Level up! You're now level ${newLevel}`);
+    else showToast('Logged ✓');
+  }
+
+  async function deleteEntry(id){
+    entries = entries.filter(e=>e.id !== id);
+    render();
+    await persist();
+  }
+
+  function renderEntryList(container, items){
+    container.innerHTML = '';
+    [...items].reverse().forEach(e=>{
+      const div = document.createElement('div');
+      div.className = 'entry';
+      const d = new Date(e.createdAt);
+      const dateStr = d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+      div.innerHTML = `
+        <div class="entry-event"></div>
+        <div class="entry-emotion"></div>
+        <div class="entry-date">${dateStr}</div>
+      `;
+      div.querySelector('.entry-event').textContent = e.event;
+      div.querySelector('.entry-emotion').textContent = e.emotion;
+      container.appendChild(div);
+    });
+  }
+
+  function renderTally(container, items){
+    const tally = {};
+    items.forEach(e=>{
+      const key = e.emotion.trim();
+      if(key && key !== '—') tally[key] = (tally[key]||0)+1;
+    });
+    const sorted = Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    container.innerHTML = sorted.map(([k,v]) => `<span class="tally-chip">${k} ×${v}</span>`).join('');
+  }
+
+  function openRecap(days, label){
+    const cutoff = daysAgo(days);
+    const items = entries.filter(e => new Date(e.createdAt) >= cutoff);
+    document.getElementById('modalBack').style.display = 'none';
+    document.getElementById('modalTitle').textContent = label;
+    document.getElementById('modalSub').textContent =
+      items.length === 0
+        ? `Nothing logged in this window yet.`
+        : `${items.length} lovely thing${items.length===1?'':'s'} since ${cutoff.toLocaleDateString(undefined,{month:'short', day:'numeric'})}`;
+    renderTally(document.getElementById('modalTally'), items);
+    renderEntryList(document.getElementById('modalList'), items);
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  function getMonthGroups(){
+    const groups = {};
+    entries.forEach(e=>{
+      const d = new Date(e.createdAt);
+      const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+      if(!groups[key]) groups[key] = { key, label: d.toLocaleDateString(undefined,{month:'long', year:'numeric'}), items: [] };
+      groups[key].items.push(e);
+    });
+    return Object.values(groups).sort((a,b)=> b.key.localeCompare(a.key));
+  }
+
+  function openMonthList(){
+    const groups = getMonthGroups();
+    document.getElementById('modalBack').style.display = 'none';
+    document.getElementById('modalTitle').textContent = 'Monthly recap';
+    document.getElementById('modalSub').textContent = groups.length === 0
+      ? 'Nothing logged yet.'
+      : 'Tap a month to see everything logged in it.';
+    document.getElementById('modalTally').innerHTML = '';
+    const listEl = document.getElementById('modalList');
+    listEl.innerHTML = '';
+    groups.forEach(g=>{
+      const row = document.createElement('div');
+      row.className = 'month-row';
+      row.innerHTML = `<span></span><span class="month-count">${g.items.length} logged</span>`;
+      row.querySelector('span').textContent = g.label;
+      row.addEventListener('click', ()=>openMonthDetail(g.key));
+      listEl.appendChild(row);
+    });
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  function openMonthDetail(key){
+    const groups = getMonthGroups();
+    const group = groups.find(g=>g.key === key);
+    if(!group) return;
+    document.getElementById('modalBack').style.display = 'block';
+    document.getElementById('modalTitle').textContent = group.label;
+    document.getElementById('modalSub').textContent = `${group.items.length} thing${group.items.length===1?'':'s'} logged this month`;
+    renderTally(document.getElementById('modalTally'), group.items);
+    renderEntryList(document.getElementById('modalList'), group.items);
+  }
+
+  document.getElementById('modalBack').addEventListener('click', openMonthList);
+
+  document.getElementById('emotionSelect').addEventListener('change', function(){
+    document.getElementById('emotionOtherInput').style.display = this.value === 'other' ? 'block' : 'none';
+    if(this.value === 'other') document.getElementById('emotionOtherInput').focus();
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', addEntry);
+  document.getElementById('emotionOtherInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter') addEntry();
+  });
+  document.getElementById('recap14').addEventListener('click', ()=>openRecap(14, 'Fortnightly recap'));
+  document.getElementById('recap30').addEventListener('click', openMonthList);
+  document.getElementById('modalClose').addEventListener('click', ()=>{
+    document.getElementById('modalOverlay').classList.remove('show');
+  });
+  document.getElementById('modalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'modalOverlay') document.getElementById('modalOverlay').classList.remove('show');
+  });
+
+  async function init(){
+    render();
+    try {
+      const db = await claude.use('db');
+      if(!db){
+        entries = SEED.slice();
+        render();
+        const note = document.createElement('div');
+        note.className = 'offline-note';
+        note.textContent = "Saving isn't available in this view right now - entries won't persist after you close the page.";
+        document.querySelector('main').prepend(note);
+        return;
+      }
+      dbRef = db.doc('log/entries');
+      const snap = await dbRef.get();
+      if(snap.exists && snap.data() && Array.isArray(snap.data().items)){
+        entries = snap.data().items.map(e => ({ ...e }));
+      } else {
+        entries = SEED.slice();
+        await dbRef.set({ items: entries });
+      }
+      render();
+    } catch(err){
+      entries = SEED.slice();
+      render();
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>

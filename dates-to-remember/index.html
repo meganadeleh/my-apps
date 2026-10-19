@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dates to remember</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ECEEF6; --card:#FFFFFF; --ink:#1E2440; --muted:#646B88; --line:#D6DAEA;
+  --gold:#F2B632; --gold-ink:#5A3E00; --soon:#FFE6A3; --today:#FF7A6B; --today-ink:#FFFFFF;
+  --field:#F6F7FB;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15182A; --card:#1F2338; --ink:#EEF0FA; --muted:#A1A7C4; --line:#33385A;
+    --gold:#F2B632; --gold-ink:#2A1D00; --soon:#4A3B12; --today:#FF7A6B; --today-ink:#1A0A08;
+    --field:#272B45;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15182A; --card:#1F2338; --ink:#EEF0FA; --muted:#A1A7C4; --line:#33385A;
+  --gold:#F2B632; --gold-ink:#2A1D00; --soon:#4A3B12; --today:#FF7A6B; --today-ink:#1A0A08;
+  --field:#272B45;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:620px;margin:0 auto;padding:28px 18px 60px}
+h1{font:700 clamp(2.1rem,7vw,3rem)/1.02 "Bricolage Grotesque","Figtree",system-ui,sans-serif;letter-spacing:-.02em;margin:8px 0 6px}
+.sub{color:var(--muted);margin:0 0 24px}
+
+form{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px;grid-template-columns:1fr 1fr}
+form .full{grid-column:1/-1}
+label{display:block;font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:4px}
+input[type=text],input[type=date]{width:100%;font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+form>*{min-width:0}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.check{display:flex;align-items:center;gap:8px;font-weight:500;color:var(--ink);align-self:end;min-height:44px}
+.check input{width:20px;height:20px;accent-color:var(--gold)}
+.btn{font:600 1rem "Figtree",system-ui,sans-serif;border:0;border-radius:12px;padding:12px 16px;cursor:pointer;min-height:44px;background:var(--ink);color:var(--bg)}
+.btn.small{font-size:.85rem;padding:8px 12px;min-height:36px;border-radius:10px}
+.btn.gold{background:var(--gold);color:var(--gold-ink)}
+.btn.ghost.danger,.btn.danger{background:var(--today);color:var(--today-ink);border-color:var(--today)}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.formerr{color:var(--today);font-size:.9rem;margin:0}
+
+.list{margin-top:28px;display:grid;gap:10px}
+.section{font:700 1.3rem/1.2 "Bricolage Grotesque","Figtree",sans-serif;letter-spacing:-.01em;margin:26px 0 0}
+.month{background:var(--card);border:1px solid var(--line);border-radius:16px}
+.month summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;font-weight:600;min-height:48px}
+.month summary::-webkit-details-marker{display:none}
+.month summary::after{content:"";width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:-4px 4px 0 0;flex:none}
+.month[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+.month .n{margin-left:auto;color:var(--muted);font-weight:500;font-size:.9rem}
+.mlist{display:grid;gap:10px;padding:0 10px 10px}
+.mlist .item{background:var(--field)}
+.group{font:600 .9rem "Figtree",sans-serif;color:var(--muted);margin:18px 0 2px}
+.item{display:grid;grid-template-columns:74px 1fr;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+.tile{border-radius:12px;background:var(--field);text-align:center;padding:8px 4px;line-height:1}
+.tile .d{font:700 1.9rem "Bricolage Grotesque",sans-serif;letter-spacing:-.02em}
+.tile .m{font-size:.8rem;font-weight:600;color:var(--muted);margin-top:4px}
+.item.soon{border-color:var(--gold)}
+.item.soon .tile{background:var(--soon)}
+.item.today{border-color:var(--today)}
+.item.today .tile{background:var(--today);color:var(--today-ink)}
+.item.today .tile .m{color:var(--today-ink)}
+.title{font-weight:600;font-size:1.05rem;margin:0}
+.meta{color:var(--muted);font-size:.9rem;margin:2px 0 0}
+.count{font-weight:600;color:var(--ink)}
+.actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sent{font-size:.8rem;color:var(--muted);align-self:center}
+.empty{text-align:center;color:var(--muted);padding:36px 12px;border:2px dashed var(--line);border-radius:18px;margin-top:28px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+.status{font-size:.8rem;color:var(--muted);margin-top:8px}
+@media (max-width:480px){form{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+
+.hl{background:linear-gradient(transparent 58%,color-mix(in srgb,var(--gold) 70%,transparent) 58%);padding:0 .08em}
+.item{--mc:var(--gold);border-left:5px solid var(--mc)}
+.tile{background:color-mix(in srgb,var(--mc) 16%,var(--card))}
+.tile .d{color:var(--mc)}
+.item.soon .tile{background:var(--soon)} .item.soon .tile .d{color:var(--ink)}
+.item.today .tile{background:var(--today)} .item.today .tile .d{color:var(--today-ink)}
+.item.soon,.item.today{border-left-width:5px}
+.month{border-top:4px solid var(--mc)}
+.month .dot{width:12px;height:12px;border-radius:50%;background:var(--mc);flex:none}
+.month summary{justify-content:flex-start}
+.month .n{background:color-mix(in srgb,var(--mc) 16%,transparent);color:var(--ink);padding:2px 10px;border-radius:999px}
+.mlist .item{background:color-mix(in srgb,var(--mc) 6%,var(--card))}
+form{border-top:4px solid var(--gold)}
+#save{background:linear-gradient(135deg,#7A5CC9,#E36FA8);color:#fff}
+.section{display:flex;align-items:center;gap:8px}
+.section::before{content:"";width:10px;height:22px;border-radius:4px;background:linear-gradient(#5B8DEF,#3FB984)}
+body{background:radial-gradient(900px 400px at 100% -10%,color-mix(in srgb,#E36FA8 14%,transparent),transparent 70%),radial-gradient(700px 400px at -10% 0%,color-mix(in srgb,#5B8DEF 14%,transparent),transparent 70%),var(--bg)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Dates to <span class="hl">remember</span></h1>
+  <p class="sub">Birthdays, big days and anything else worth a message.</p>
+
+  <form id="f" autocomplete="off">
+    <div class="full">
+      <label for="t">What's happening</label>
+      <input id="t" type="text" maxlength="120" required>
+    </div>
+    <div class="full">
+      <label for="d">Date</label>
+      <input id="d" type="date" required>
+    </div>
+    <div class="full">
+      <label for="n">Note (optional)</label>
+      <input id="n" type="text" maxlength="200">
+    </div>
+    <div class="full" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn" type="submit" id="save">Add date</button>
+      <button class="btn ghost" type="button" id="cancel" hidden>Cancel edit</button>
+      <p class="formerr" id="err" hidden></p>
+    </div>
+  </form>
+
+  <div id="list"></div>
+  <p class="status" id="status"></p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* Standalone storage: when this page runs outside claude.ai, everything is saved
+   in this browser's localStorage. Nothing is sent anywhere. */
+(function(){
+  if (window.claude && window.claude.use) return;
+  var KEY = 'app-data:' + location.pathname;
+  var store = {};
+  try { store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { store = {}; }
+  var listeners = [];
+  function persist(){ try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+  function clone(v){ return v === undefined ? undefined : JSON.parse(JSON.stringify(v)); }
+  function norm(p){ return String(p).replace(/^\/+|\/+$/g, ''); }
+  function notify(){ setTimeout(function(){ listeners.slice().forEach(function(l){ try { l(); } catch (e) {} }); }, 0); }
+  function docSnap(path){
+    var has = Object.prototype.hasOwnProperty.call(store, path);
+    var id = path.split('/').pop();
+    return { id: id, exists: has, metadata: { hasPendingWrites: false },
+      data: function(){ return has ? clone(store[path]) : undefined; }, ref: docRef(path) };
+  }
+  function docRef(p){
+    var path = norm(p);
+    return {
+      id: path.split('/').pop(), path: path,
+      get: function(){ return Promise.resolve(docSnap(path)); },
+      set: function(d){ store[path] = clone(d) || {}; persist(); notify(); return Promise.resolve(); },
+      update: function(patch){ store[path] = Object.assign({}, store[path] || {}, clone(patch)); persist(); notify(); return Promise.resolve(); },
+      delete: function(){ delete store[path]; persist(); notify(); return Promise.resolve(); },
+      onSnapshot: function(cb){
+        var last = null;
+        var fire = function(){ var s = JSON.stringify(store[path]); if (s === last) return; last = s; cb(docSnap(path)); };
+        listeners.push(fire); setTimeout(fire, 0);
+        return function(){ listeners = listeners.filter(function(x){ return x !== fire; }); };
+      }
+    };
+  }
+  function colSnap(path){
+    var pre = path + '/';
+    var docs = Object.keys(store).filter(function(k){ return k.indexOf(pre) === 0 && k.slice(pre.length).indexOf('/') < 0; })
+      .sort().map(function(k){ return docSnap(k); });
+    return { docs: docs, size: docs.length, empty: !docs.length, forEach: function(f){ docs.forEach(f); } };
+  }
+  function colRef(p){
+    var path = norm(p);
+    return {
+      path: path,
+      doc: function(id){ return docRef(path + '/' + (id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)))); },
+      get: function(){ return Promise.resolve(colSnap(path)); },
+      onSnapshot: function(cb){
+        var last = null;
+        var fire = function(){ var s = colSnap(path); var sig = JSON.stringify(s.docs.map(function(d){ return [d.id, store[path + '/' + d.id]]; })); if (sig === last) return; last = sig; cb(s); };
+        listeners.push(fire); setTimeout(fire, 0);
+        return function(){ listeners = listeners.filter(function(x){ return x !== fire; }); };
+      }
+    };
+  }
+  var db = { doc: docRef, collection: colRef };
+  var user = { id: function(){ return Promise.resolve('local'); } };
+  var downloads = { save: function(o){
+    var blob = o.data instanceof Blob ? o.data : new Blob([o.data], { type: o.mimeType || 'application/octet-stream' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = o.filename || 'download';
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return Promise.resolve();
+  } };
+  window.claude = { use: function(name){
+    if (name === 'db') return Promise.resolve(db);
+    if (name === 'user') return Promise.resolve(user);
+    if (name === 'downloads') return Promise.resolve(downloads);
+    return Promise.resolve(null);
+  } };
+})();
+</script>
+<script>
+const MC = ["#5B8DEF","#E36FA8","#3FB984","#E0A21F","#8E6CF0","#FF7F50","#23A9B8","#EE5D6C","#E08A1E","#D2572A","#7A5CC9","#2E9E6A"];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let items = [];
+let editingId = null;
+const openMonths = new Set();
+let store = null; // {save(item), remove(id)}
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function parseISO(s){const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function iso(dt){return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0")}
+function today(){const t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate())}
+function nextOccurrence(it){
+  return parseISO(it.date);
+}
+function daysUntil(dt){return Math.round((dt-today())/86400000)}
+function countText(n){
+  if(n===0) return "Today";
+  if(n===1) return "Tomorrow";
+  if(n===-1) return "Yesterday";
+  if(n<0) return Math.abs(n)+" days ago";
+  if(n<14) return "In "+n+" days";
+  const w=Math.round(n/7);
+  return n<60 ? "In about "+w+" weeks" : "In about "+Math.round(n/30.4)+" months";
+}
+function shortcutText(it){return it.title.replace(/\|/g,"/")+"|"+iso(nextOccurrence(it))+" 09:00"}
+
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2200)}
+
+function render(){
+  const list=$("#list");
+  if(!items.length){list.innerHTML='<div class="empty">No dates yet. Add the first one above.</div>';return}
+  const rows=items.map(it=>{const nx=nextOccurrence(it);return {it,nx,n:daysUntil(nx)}}).sort((a,b)=>a.nx-b.nx);
+  const upcoming=rows.filter(r=>r.n>=0), past=rows.filter(r=>r.n<0).reverse();
+  let html='<div class="list">';
+  const card=r=>{
+    const {it,nx,n}=r;
+    const cls=n===0?"today":(n>0&&n<=4?"soon":"");
+    const dateStr=nx.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    return `<article class="item ${cls}" style="--mc:${MC[nx.getMonth()]}">
+      <div class="tile" aria-hidden="true"><div class="d">${nx.getDate()}</div><div class="m">${MONTHS[nx.getMonth()]}</div></div>
+      <div>
+        <p class="title">${esc(it.title)}</p>
+        <p class="meta"><span class="count">${countText(n)}</span> - ${dateStr}</p>
+        ${it.note?`<p class="meta">${esc(it.note)}</p>`:""}
+        <div class="actions">
+          ${n>=0?`<button class="btn small gold" data-copy="${it.id}">Copy</button>`:""}
+          <button class="btn small ghost" data-edit="${it.id}">Edit</button>
+          <button class="btn small ghost" data-del="${it.id}">Delete</button>
+          ${it.sentFor&&it.sentFor===iso(nx)?'<span class="sent">Copied</span>':""}
+        </div>
+      </div>
+    </article>`;
+  };
+  const isSet=r=>r.it.sentFor&&r.it.sentFor===iso(r.nx);
+  const todo=upcoming.filter(r=>!isSet(r)), done=upcoming.filter(isSet);
+  if(todo.length){html+='<p class="group">Needs copying</p>'+todo.map(card).join("")}
+  if(done.length){
+    html+='<h2 class="section">Reminders set</h2>';
+    const months=[];
+    done.forEach(r=>{
+      const m=r.nx.toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+      let g=months.find(x=>x.m===m); if(!g){g={m,rows:[]};months.push(g)}
+      g.rows.push(r);
+    });
+    months.forEach(g=>{
+      html+=`<details class="month" style="--mc:${MC[g.rows[0].nx.getMonth()]}" data-month="${esc(g.m)}"${openMonths.has(g.m)?" open":""}>
+        <summary><span class="dot"></span><span>${esc(g.m)}</span><span class="n">${g.rows.length} ${g.rows.length===1?"date":"dates"}</span></summary>
+        <div class="mlist">${g.rows.map(card).join("")}</div></details>`;
+    });
+  }
+  if(past.length){html+='<p class="group">Already passed</p>'+past.map(card).join("")}
+  list.innerHTML=html+"</div>";
+}
+
+$("#list").addEventListener("toggle",e=>{const d=e.target;if(!d.matches||!d.matches("details.month"))return;d.open?openMonths.add(d.dataset.month):openMonths.delete(d.dataset.month)},true);
+$("#list").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-copy],[data-edit],[data-del],[data-sent]");
+  if(!b) return;
+  if(b.dataset.sent){
+    const it=items.find(i=>i.id===b.dataset.sent); if(!it) return;
+    it.sentFor=iso(nextOccurrence(it)); store.save(it); setTimeout(render,400); return;
+  }
+  if(b.dataset.copy){
+    const it=items.find(i=>i.id===b.dataset.copy); if(!it) return;
+    const txt=shortcutText(it);
+    try{await navigator.clipboard.writeText(txt);}
+    catch{const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch{}ta.remove();}
+    it.sentFor=iso(nextOccurrence(it)); store.save(it); render();
+    toast("Copied - paste it into your calendar or reminders"); return;
+  }
+  if(b.dataset.edit){
+    const it=items.find(i=>i.id===b.dataset.edit); if(!it) return;
+    editingId=it.id; $("#t").value=it.title; $("#d").value=it.date; $("#n").value=it.note||"";
+    $("#save").textContent="Save changes"; $("#cancel").hidden=false; $("#t").focus(); window.scrollTo({top:0}); return;
+  }
+  if(b.dataset.del){
+    const it=items.find(i=>i.id===b.dataset.del); if(!it) return;
+    if(b.dataset.armed!=="1"){
+      b.dataset.armed="1"; b.textContent="Tap again to delete"; b.classList.add("danger");
+      clearTimeout(b._t); b._t=setTimeout(()=>{b.dataset.armed="";b.textContent="Delete";b.classList.remove("danger")},3000);
+      return;
+    }
+    items=items.filter(i=>i.id!==it.id); store.remove(it.id); render(); toast("Deleted");
+  }
+});
+
+function resetForm(){editingId=null;$("#f").reset();$("#save").textContent="Add date";$("#cancel").hidden=true;$("#err").hidden=true}
+$("#cancel").addEventListener("click",resetForm);
+$("#f").addEventListener("submit",e=>{
+  e.preventDefault();
+  const title=$("#t").value.trim(), date=$("#d").value;
+  if(!title||!date){$("#err").textContent="Add a name and a date.";$("#err").hidden=false;return}
+  let it;
+  if(editingId){
+    it=items.find(i=>i.id===editingId);
+    const changed=it.date!==date||it.title!==title;
+    Object.assign(it,{title,date,note:$("#n").value.trim()});
+    if(changed) delete it.sentFor;
+    toast("Changes saved");
+  }else{
+    it={id:"d"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title,date,note:$("#n").value.trim(),created:Date.now()};
+    items.push(it); toast("Date added");
+  }
+  store.save(it); resetForm(); render();
+});
+
+// Storage: private db subtree if available, otherwise this browser only
+function localStore(){
+  const K="dates-to-remember";
+  try{items=JSON.parse(localStorage.getItem(K)||"[]")}catch{items=[]}
+  const persist=()=>{try{localStorage.setItem(K,JSON.stringify(items))}catch{}};
+  return {save:persist,remove:persist};
+}
+store=localStore(); render();
+
+(async()=>{
+  if(!window.claude||!window.claude.use){$("#status").textContent="Saved on this device only.";return}
+  try{
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+    const uid=db&&user?await user.id():null;
+    if(!uid){$("#status").textContent="Saved on this device only.";return}
+    const ref=db.collection("data/users/"+uid);
+    const localItems=items.slice(); let migrated=false;
+    store={
+      save:it=>{const c={...it};ref.doc(it.id).set(c).catch(()=>toast("Couldn't save - try again"))},
+      remove:id=>{ref.doc(id).delete().catch(()=>toast("Couldn't delete - try again"))}
+    };
+    ref.onSnapshot(snap=>{
+      items=snap.docs.map(d=>({...d.data()})).filter(x=>x&&x.id&&x.date);
+      if(!migrated){
+        migrated=true;
+        const have=new Set(items.map(i=>i.id));
+        localItems.filter(i=>i&&i.id&&!have.has(i.id)).forEach(i=>{items.push(i);ref.doc(i.id).set({...i}).catch(()=>{})});
+      }
+      render();
+      $("#status").textContent="Saved in this browser.";
+    },()=>{$("#status").textContent="Sync paused. Reload to try again."});
+  }catch{ $("#status").textContent="Saved on this device only."; }
+})();
+</script>
+</body>
+</html>
